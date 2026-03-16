@@ -11,13 +11,21 @@ Wires parser → optimizer → carbon → visualizer into a single analysis flow
 
 from __future__ import annotations
 
-import greenpipeline._paths  # noqa: F401 — activate local repo paths
-
-import logging
-import time
-import uuid
+import sys
 from pathlib import Path
 
+# Ensure the project root is on sys.path for direct script execution.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+import logging
+import os
+import time
+import uuid
+from typing import Any, cast
+
+import greenpipeline._paths  # noqa: F401 — activate local repo paths
 from greenpipeline import PipelineResult
 from greenpipeline.carbon import estimate_emissions
 from greenpipeline.optimizer import analyze_pipeline
@@ -28,20 +36,42 @@ from greenpipeline.visualizer import draw_pipeline_dag, export_dag_image
 logger = logging.getLogger(__name__)
 
 _SAMPLES_DIR = Path(__file__).parent / "samples"
+AIOpsSession = cast(Any, None)
+AIOpsResponseParser = cast(Any, None)
+dagger_sdk = cast(Any, None)
+
+
+def _has_kube_config() -> bool:
+    """Return True if Kubernetes config is available."""
+    kubeconfig_env = os.getenv("KUBECONFIG")
+    if kubeconfig_env:
+        for entry in kubeconfig_env.split(":"):
+            if Path(entry).expanduser().exists():
+                return True
+    return (Path.home() / ".kube" / "config").exists()
+
 
 # ---- Local AIOpsLab imports ----
-try:
-    from aiopslab.session import Session as AIOpsSession
-    from aiopslab.orchestrator.parser import ResponseParser as AIOpsResponseParser
+if _has_kube_config():
+    try:
+        from aiopslab.orchestrator.parser import (
+            ResponseParser as AIOpsResponseParser,  # type: ignore[import-not-found]
+        )
+        from aiopslab.session import (
+            Session as AIOpsSession,  # type: ignore[import-not-found]
+        )
 
-    _HAS_AIOPSLAB = True
-except Exception as _err:
-    logger.warning("Could not import local AIOpsLab: %s", _err)
+        _HAS_AIOPSLAB = True
+    except Exception as _err:
+        logger.warning("Could not import local AIOpsLab: %s", _err)
+        _HAS_AIOPSLAB = False
+else:
+    logger.info("Skipping AIOpsLab import: no Kubernetes config found")
     _HAS_AIOPSLAB = False
 
 # ---- Local Dagger SDK imports ----
 try:
-    import dagger as dagger_sdk  # from dagger/sdk/python/src/
+    import dagger as dagger_sdk  # type: ignore[import-not-found]  # from dagger/sdk/python/src/
 
     _HAS_DAGGER = True
 except Exception as _err:
@@ -170,10 +200,7 @@ async def simulate_with_dagger(yaml_path: str | Path) -> dict:
             results = {}
             for job_name, job_info in dag.jobs.items():
                 image = job_info.image or "alpine:3.18"
-                container = (
-                    client.container()
-                    .from_(image)
-                )
+                container = client.container().from_(image)
 
                 # Execute each script line in the container
                 for line in job_info.script:
@@ -254,10 +281,14 @@ def run_analysis(
         config = parse_gitlab_ci(sample)
 
     dag = build_dag(config)
-    session.add("env", f"Parsed pipeline: {len(dag.jobs)} jobs, {len(dag.stages)} stages")
+    session.add(
+        "env", f"Parsed pipeline: {len(dag.jobs)} jobs, {len(dag.stages)} stages"
+    )
     logger.info(
         "Parsed pipeline: %d jobs, %d stages, %.1f min critical path",
-        len(dag.jobs), len(dag.stages), dag.critical_path_min,
+        len(dag.jobs),
+        len(dag.stages),
+        dag.critical_path_min,
     )
 
     # 2. Optimize
@@ -268,7 +299,8 @@ def run_analysis(
     )
     logger.info(
         "Optimization: %d suggestions, %.1f min saving",
-        len(report.suggestions), report.total_saving_min,
+        len(report.suggestions),
+        report.total_saving_min,
     )
 
     # 3. Carbon (uses local CodeCarbon)
@@ -300,10 +332,10 @@ def run_analysis(
 
     # 5. Generate reasoning explanations and efficiency score
     from greenpipeline.agents.reasoning_agent import generate_reasoning
+
     reasoning = generate_reasoning(report)
     session.add(
-        "assistant",
-        f"Pipeline Efficiency Score: {reasoning.efficiency_score}/100"
+        "assistant", f"Pipeline Efficiency Score: {reasoning.efficiency_score}/100"
     )
     logger.info("Pipeline Efficiency Score: %d", reasoning.efficiency_score)
 
@@ -349,6 +381,6 @@ if __name__ == "__main__":
 
     # Print clean Markdown output for GitLab Duo Agent Platform
     from greenpipeline.gitlab_comment import generate_gitlab_comment_with_patch
-    
+
     comment = generate_gitlab_comment_with_patch(result)
     print(comment)

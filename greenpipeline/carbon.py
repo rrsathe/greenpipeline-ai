@@ -16,10 +16,21 @@ import greenpipeline._paths  # noqa: F401 — activate local repo paths
 
 import logging
 import time
+from typing import Any, cast
 
 from greenpipeline import CarbonReport, PipelineDAG
 
 logger = logging.getLogger(__name__)
+_codecarbon_logger = logging.getLogger("codecarbon")
+_codecarbon_logger.setLevel(logging.ERROR)
+_codecarbon_logger.propagate = False
+_codecarbon_logger.disabled = True
+logging.getLogger("codecarbon.emissions_tracker").setLevel(logging.ERROR)
+OfflineEmissionsTracker = cast(Any, None)
+Energy = cast(Any, None)
+EmissionsPerKWh = cast(Any, None)
+Emissions = cast(Any, None)
+DataSource = cast(Any, None)
 
 # ---- Local CodeCarbon imports ----
 try:
@@ -63,6 +74,7 @@ def _try_codecarbon_estimate(
             save_to_file=False,
             save_to_api=False,
             measure_power_secs=1,
+            allow_multiple_runs=False,
         )
         tracker.start()
 
@@ -77,7 +89,7 @@ def _try_codecarbon_estimate(
 
         # Get the Energy object that CodeCarbon tracked
         total_energy = getattr(tracker, "_total_energy", None)
-        energy_kwh = total_energy.kWh if hasattr(total_energy, "kWh") else 0.0
+        energy_kwh = float(getattr(total_energy, "kWh", 0.0))
 
         return {
             "emissions_kg": emissions_kg * scale_factor,
