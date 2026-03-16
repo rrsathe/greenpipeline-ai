@@ -1,0 +1,46 @@
+stages:
+  - build
+  - test
+  - scan
+  - deploy
+
+build_app:
+  stage: build
+  script:
+    - npm install
+    - npm run build
+
+build_docker:
+  stage: build
+  script:
+    - docker build -t myapp:latest .
+    - docker tag myapp:latest myapp:$CI_COMMIT_SHA
+
+unit_tests:
+  stage: test
+  script:
+    - npm ci
+    - npm test
+
+integration_tests:
+  stage: test
+  script:
+    - npm ci
+    - npm run integration
+
+lint:
+  stage: test
+  script:
+    - npm ci
+    - npm run lint
+
+sast_scan:
+  stage: scan
+  script:
+    - pip install bandit
+    - bandit -r .
+
+deploy_prod:
+  stage: deploy
+  script:
+    - echo "Deploying to production"

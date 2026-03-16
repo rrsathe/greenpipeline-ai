@@ -1,0 +1,63 @@
+stages:
+  - build
+  - test
+  - scan
+  - deploy
+
+build_app:
+  stage: build
+  script:
+    - npm install
+    - npm run build
+  cache:
+    paths:
+      - node_modules/
+
+build_docker:
+  stage: build
+  script:
+    - docker build -t myapp:latest .
+    - docker tag myapp:latest myapp:$CI_COMMIT_SHA
+  # Can run in parallel with build_app using explicit needs if desired
+  # needs: []
+
+unit_tests:
+  stage: test
+  script:
+    - npm ci
+    - npm test
+  cache:
+    paths:
+      - node_modules/
+
+integration_tests:
+  stage: test
+  script:
+    - npm ci
+    - npm run integration
+  cache:
+    paths:
+      - node_modules/
+
+lint:
+  stage: test
+  script:
+    - npm ci
+    - npm run lint
+  cache:
+    paths:
+      - node_modules/
+
+sast_scan:
+  stage: scan
+  script:
+    - pip install bandit
+    - bandit -r .
+  cache:
+    paths:
+      - .cache/pip
+
+deploy_prod:
+  stage: deploy
+  script:
+    - echo "Deploying to production"

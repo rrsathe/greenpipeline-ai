@@ -1,0 +1,1024 @@
+.
+├── .agent
+│   ├── agents
+│   │   ├── architecture-agent
+│   │   ├── carbon-intelligence-agent
+│   │   ├── demo-agent
+│   │   ├── integration-agent
+│   │   ├── optimization-agent
+│   │   └── pipeline-analysis-agent
+│   └── skills
+│       ├── aiopslab-integration
+│       ├── carbon-estimator
+│       ├── dagger-pipeline-runner
+│       ├── hackathon-demo-builder
+│       ├── pipeline-optimizer
+│       ├── pipeline-parser
+│       └── pipeline-visualizer
+├── .gitlab
+│   └── duo
+│       ├── agent-config.yml
+│       └── flows
+├── .pytest_cache
+│   ├── .gitignore
+│   ├── CACHEDIR.TAG
+│   ├── README.md
+│   └── v
+│       └── cache
+├── .venv
+│   ├── .gitignore
+│   ├── .lock
+│   ├── bin
+│   │   ├── activate
+│   │   ├── activate.csh
+│   │   ├── activate.fish
+│   │   ├── Activate.ps1
+│   │   ├── carbonboard
+│   │   ├── codecarbon
+│   │   ├── cpuinfo
+│   │   ├── f2py
+│   │   ├── fonttools
+│   │   ├── jsonschema
+│   │   ├── markdown-it
+│   │   ├── normalizer
+│   │   ├── numpy-config
+│   │   ├── pip
+│   │   ├── pip3
+│   │   ├── pip3.14
+│   │   ├── py.test
+│   │   ├── pyftmerge
+│   │   ├── pyftsubset
+│   │   ├── pygmentize
+│   │   ├── pytest
+│   │   ├── python -> python3
+│   │   ├── python3 -> /usr/sbin/python3
+│   │   ├── python3.14 -> python3
+│   │   ├── streamlit
+│   │   ├── ttx
+│   │   ├── typer
+│   │   ├── wandb
+│   │   ├── watchmedo
+│   │   ├── wb
+│   │   └── 𝜋thon -> python3
+│   ├── etc
+│   │   └── jupyter
+│   ├── include
+│   ├── lib
+│   │   └── python3.14
+│   ├── lib64 -> lib
+│   ├── pyvenv.cfg
+│   └── share
+│       ├── jupyter
+│       └── man
+├── AGENTS.md
+├── AIOpsLab
+│   ├── .env.example
+│   ├── .git
+│   │   ├── config
+│   │   ├── description
+│   │   ├── FETCH_HEAD
+│   │   ├── HEAD
+│   │   ├── hooks
+│   │   ├── index
+│   │   ├── info
+│   │   ├── logs
+│   │   ├── objects
+│   │   ├── packed-refs
+│   │   └── refs
+│   ├── .github
+│   │   ├── ISSUE_TEMPLATE
+│   │   └── workflows
+│   ├── .gitignore
+│   ├── .gitmodules
+│   ├── aiopslab
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── config.py
+│   │   ├── config.yml.example
+│   │   ├── generators
+│   │   ├── observer
+│   │   ├── onboarding_evaluator.py
+│   │   ├── orchestrator
+│   │   ├── paths.py
+│   │   ├── service
+│   │   ├── session.py
+│   │   └── utils
+│   ├── aiopslab-applications
+│   ├── assessment.py
+│   ├── assets
+│   │   └── images
+│   ├── CLAUDE.md
+│   ├── cli.py
+│   ├── clients
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   ├── configs
+│   │   ├── deepseek.py
+│   │   ├── flash.py
+│   │   ├── generic_openai.py
+│   │   ├── gpt.py
+│   │   ├── gpt_azure_identity.py
+│   │   ├── launch_vllm.sh
+│   │   ├── llama.py
+│   │   ├── openrouter.py
+│   │   ├── qwen.py
+│   │   ├── react.py
+│   │   ├── README.md
+│   │   ├── registry.py
+│   │   ├── utils
+│   │   └── vllm.py
+│   ├── CODE_OF_CONDUCT.md
+│   ├── CONTRIBUTING.md
+│   ├── kind
+│   │   ├── .dockerignore
+│   │   ├── Dockerfile
+│   │   ├── images.txt
+│   │   ├── kind-config-arm.yaml
+│   │   ├── kind-config-x86.yaml
+│   │   ├── load_images.sh
+│   │   ├── pull_images.sh
+│   │   └── README.md
+│   ├── LICENSE.txt
+│   ├── NOTICE.txt
+│   ├── poetry.lock
+│   ├── pyproject.toml
+│   ├── README.md
+│   ├── scripts
+│   │   ├── ansible
+│   │   └── terraform
+│   ├── SECURITY.md
+│   ├── service.py
+│   ├── SUPPORT.md
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── integration
+│   │   ├── judge
+│   │   ├── orchestrator
+│   │   ├── parser
+│   │   ├── registry
+│   │   └── shell
+│   └── TutorialSetup.md
+├── codecarbon
+│   ├── .editorconfig
+│   ├── .env.example
+│   ├── .env.fief
+│   ├── .flake8
+│   ├── .git
+│   │   ├── config
+│   │   ├── description
+│   │   ├── FETCH_HEAD
+│   │   ├── HEAD
+│   │   ├── hooks
+│   │   ├── index
+│   │   ├── info
+│   │   ├── logs
+│   │   ├── objects
+│   │   ├── packed-refs
+│   │   └── refs
+│   ├── .gitattributes
+│   ├── .github
+│   │   ├── CODEOWNERS
+│   │   ├── copilot-instructions.md
+│   │   ├── FUNDING.yml
+│   │   ├── ISSUE_TEMPLATE
+│   │   ├── PULL_REQUEST_TEMPLATE.md
+│   │   ├── pyproject_versions.py
+│   │   ├── release-drafter.yml
+│   │   └── workflows
+│   ├── .gitignore
+│   ├── .isort.cfg
+│   ├── .pre-commit-config.yaml
+│   ├── act
+│   │   └── Dockerfile
+│   ├── carbonserver
+│   │   ├── .env.example
+│   │   ├── __init__.py
+│   │   ├── carbonserver
+│   │   ├── debug.sql
+│   │   ├── docker
+│   │   ├── docs
+│   │   ├── Images
+│   │   ├── initial_data.py
+│   │   ├── main.py
+│   │   ├── pyproject.toml
+│   │   ├── README.md
+│   │   ├── tests
+│   │   └── uv.lock
+│   ├── CLAUDE.md -> .github/copilot-instructions.md
+│   ├── CODE_OF_CONDUCT.md
+│   ├── codecarbon
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── _version.py
+│   │   ├── cli
+│   │   ├── core
+│   │   ├── data
+│   │   ├── emissions_tracker.py
+│   │   ├── external
+│   │   ├── input.py
+│   │   ├── lock.py
+│   │   ├── output.py
+│   │   ├── output_methods
+│   │   ├── py.typed
+│   │   └── viz
+│   ├── CONTRIBUTING.md
+│   ├── deploy
+│   │   ├── .env.example
+│   │   ├── .env.fief.example
+│   │   ├── .env.webapp.example
+│   │   ├── ansible
+│   │   ├── deploy.py
+│   │   ├── fief-compose.yml
+│   │   ├── README.md
+│   │   ├── rules
+│   │   └── traefik-compose.yml
+│   ├── docker
+│   │   ├── .dockerignore
+│   │   ├── docker.env
+│   │   ├── Dockerfile
+│   │   ├── entrypoint.sh
+│   │   ├── prometheus.yml
+│   │   └── README.md
+│   ├── docker-compose.yml
+│   ├── docs
+│   │   ├── .nojekyll
+│   │   ├── getting-started
+│   │   ├── images
+│   │   ├── index.md
+│   │   ├── introduction
+│   │   ├── javascripts
+│   │   ├── logging
+│   │   └── stylesheets
+│   ├── examples
+│   │   ├── api_call_debug.py
+│   │   ├── api_call_demo.py
+│   │   ├── bert_inference.py
+│   │   ├── command_line_tool.py
+│   │   ├── compare_cpu_load_and_RAPL.ipynb
+│   │   ├── compare_cpu_load_and_RAPL.py
+│   │   ├── emissions.csv
+│   │   ├── full_cpu.py
+│   │   ├── local_llms.ipynb
+│   │   ├── logfire_metrics.py
+│   │   ├── logging_to_file.py
+│   │   ├── logging_to_file_exclusive_run.py
+│   │   ├── logging_to_google_cloud.py
+│   │   ├── mnist-comet.py
+│   │   ├── mnist-sklearn.py
+│   │   ├── mnist.py
+│   │   ├── mnist_callback.py
+│   │   ├── mnist_context_manager.py
+│   │   ├── mnist_decorator.py
+│   │   ├── mnist_grid_search.py
+│   │   ├── mnist_inference.py
+│   │   ├── mnist_random_search.py
+│   │   ├── multithread.py
+│   │   ├── notebook.ipynb
+│   │   ├── notebooks
+│   │   ├── ollama_local_api.py
+│   │   ├── print_hardware.py
+│   │   ├── prometheus_call.py
+│   │   ├── pue.py
+│   │   ├── pytorch-multigpu-example.py
+│   │   ├── rapl
+│   │   ├── README.md
+│   │   ├── requirements-examples.txt
+│   │   ├── task_inference.py
+│   │   ├── task_loop_same_task.py
+│   │   ├── test_rapl_calculus.sh
+│   │   ├── transformers_smollm2.py
+│   │   └── wue.py
+│   ├── GEMINI.md -> .github/copilot-instructions.md
+│   ├── LICENSE
+│   ├── mkdocs.yml
+│   ├── privacy_policy_en.md
+│   ├── pyproject.toml
+│   ├── pytest.ini
+│   ├── README.md
+│   ├── requirements
+│   │   ├── README.md
+│   │   └── requirements-api.txt
+│   ├── scripts
+│   │   └── deploy-docs.sh
+│   ├── SECURITY.md
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── cli
+│   │   ├── fake_modules
+│   │   ├── output_methods
+│   │   ├── test_api_call.py
+│   │   ├── test_cloud.py
+│   │   ├── test_config.py
+│   │   ├── test_core_util.py
+│   │   ├── test_cpu.py
+│   │   ├── test_cpu_load.py
+│   │   ├── test_custom_handler.py
+│   │   ├── test_data
+│   │   ├── test_electricitymaps_api.py
+│   │   ├── test_electricitymaps_backward_compatibility.py
+│   │   ├── test_electricitymaps_config_backward_compatibility.py
+│   │   ├── test_emissions.py
+│   │   ├── test_emissions_tracker.py
+│   │   ├── test_emissions_tracker_constant.py
+│   │   ├── test_emissions_tracker_flush.py
+│   │   ├── test_energy.py
+│   │   ├── test_geography.py
+│   │   ├── test_gpu.py
+│   │   ├── test_input.py
+│   │   ├── test_lock.py
+│   │   ├── test_logger.py
+│   │   ├── test_logging_output.py
+│   │   ├── test_offline_emissions_tracker.py
+│   │   ├── test_package_integrity.py
+│   │   ├── test_powermetrics.py
+│   │   ├── test_ram.py
+│   │   ├── test_rapl_mmio_scanning.py
+│   │   ├── test_rapl_parameters.py
+│   │   ├── test_rapl_permissions.py
+│   │   ├── test_tracking_inference.py
+│   │   ├── test_unsupported_gpu.py
+│   │   ├── test_utilization_tracking.py
+│   │   ├── test_viz_data.py
+│   │   ├── test_viz_units.py
+│   │   ├── testdata.py
+│   │   └── testutils.py
+│   ├── uv.lock
+│   └── webapp
+│       ├── .env.development
+│       ├── .env.example
+│       ├── .eslintrc.json
+│       ├── .gitignore
+│       ├── .prettierignore
+│       ├── .prettierrc
+│       ├── components.json
+│       ├── dev.Dockerfile
+│       ├── next.config.mjs
+│       ├── package-lock.json
+│       ├── package.json
+│       ├── pnpm-lock.yaml
+│       ├── postcss.config.mjs
+│       ├── public
+│       ├── README.md
+│       ├── src
+│       ├── tailwind.config.ts
+│       └── tsconfig.json
+├── dagger
+│   ├── .changes
+│   │   ├── .next
+│   │   ├── header.tpl.md
+│   │   ├── unreleased
+│   │   ├── v0.6.3.md
+│   │   ├── v0.6.4.md
+│   │   ├── v0.8.0.md
+│   │   ├── v0.8.1.md
+│   │   ├── v0.8.2.md
+│   │   ├── v0.8.3.md
+│   │   ├── v0.8.4.md
+│   │   ├── v0.8.5.md
+│   │   ├── v0.8.6.md
+│   │   ├── v0.8.7.md
+│   │   ├── v0.8.8.md
+│   │   ├── v0.9.0.md
+│   │   ├── v0.9.1.md
+│   │   ├── v0.9.2.md
+│   │   ├── v0.9.3.md
+│   │   ├── v0.9.4.md
+│   │   ├── v0.9.5.md
+│   │   ├── v0.9.6.md
+│   │   ├── v0.9.7.md
+│   │   ├── v0.9.8.md
+│   │   ├── v0.9.9.md
+│   │   ├── v0.9.10.md
+│   │   ├── v0.9.11.md
+│   │   ├── v0.10.0.md
+│   │   ├── v0.10.1.md
+│   │   ├── v0.10.2.md
+│   │   ├── v0.10.3.md
+│   │   ├── v0.11.0.md
+│   │   ├── v0.11.1.md
+│   │   ├── v0.11.2.md
+│   │   ├── v0.11.3.md
+│   │   ├── v0.11.4.md
+│   │   ├── v0.11.5.md
+│   │   ├── v0.11.6.md
+│   │   ├── v0.11.7.md
+│   │   ├── v0.11.8.md
+│   │   ├── v0.11.9.md
+│   │   ├── v0.12.0.md
+│   │   ├── v0.12.1.md
+│   │   ├── v0.12.2.md
+│   │   ├── v0.12.3.md
+│   │   ├── v0.12.4.md
+│   │   ├── v0.12.5.md
+│   │   ├── v0.12.6.md
+│   │   ├── v0.12.7.md
+│   │   ├── v0.13.0.md
+│   │   ├── v0.13.1.md
+│   │   ├── v0.13.2.md
+│   │   ├── v0.13.3.md
+│   │   ├── v0.13.4.md
+│   │   ├── v0.13.5.md
+│   │   ├── v0.13.6.md
+│   │   ├── v0.13.7.md
+│   │   ├── v0.14.0.md
+│   │   ├── v0.15.0.md
+│   │   ├── v0.15.1.md
+│   │   ├── v0.15.2.md
+│   │   ├── v0.15.3.md
+│   │   ├── v0.15.4.md
+│   │   ├── v0.16.0.md
+│   │   ├── v0.16.1.md
+│   │   ├── v0.16.2.md
+│   │   ├── v0.16.3.md
+│   │   ├── v0.17.0.md
+│   │   ├── v0.17.1.md
+│   │   ├── v0.17.2.md
+│   │   ├── v0.18.0.md
+│   │   ├── v0.18.1.md
+│   │   ├── v0.18.2.md
+│   │   ├── v0.18.3.md
+│   │   ├── v0.18.4.md
+│   │   ├── v0.18.5.md
+│   │   ├── v0.18.6.md
+│   │   ├── v0.18.7.md
+│   │   ├── v0.18.8.md
+│   │   ├── v0.18.9.md
+│   │   ├── v0.18.10.md
+│   │   ├── v0.18.11.md
+│   │   ├── v0.18.12.md
+│   │   ├── v0.18.13.md
+│   │   ├── v0.18.14.md
+│   │   ├── v0.18.15.md
+│   │   ├── v0.18.16.md
+│   │   ├── v0.18.17.md
+│   │   ├── v0.18.18.md
+│   │   ├── v0.18.19.md
+│   │   ├── v0.19.0.md
+│   │   ├── v0.19.1.md
+│   │   ├── v0.19.2.md
+│   │   ├── v0.19.3.md
+│   │   ├── v0.19.4.md
+│   │   ├── v0.19.5.md
+│   │   ├── v0.19.6.md
+│   │   ├── v0.19.7.md
+│   │   ├── v0.19.8.md
+│   │   ├── v0.19.9.md
+│   │   ├── v0.19.10.md
+│   │   ├── v0.19.11.md
+│   │   ├── v0.20.0.md
+│   │   └── v0.20.1.md
+│   ├── .changie.yaml
+│   ├── .claude
+│   │   └── skills -> ../skills
+│   ├── .codex
+│   │   └── skills -> ../skills
+│   ├── .contributing
+│   │   ├── adding-pragmas.md
+│   │   ├── python-decorator-guide.md
+│   │   └── typescript-pragma-decorator-guide.md
+│   ├── .dagger
+│   │   ├── .gitattributes
+│   │   ├── .gitignore
+│   │   ├── go.mod
+│   │   ├── go.sum
+│   │   └── main.go
+│   ├── .env.gha
+│   ├── .git
+│   │   ├── config
+│   │   ├── description
+│   │   ├── FETCH_HEAD
+│   │   ├── HEAD
+│   │   ├── hooks
+│   │   ├── index
+│   │   ├── info
+│   │   ├── logs
+│   │   ├── objects
+│   │   ├── packed-refs
+│   │   └── refs
+│   ├── .gitattributes
+│   ├── .github
+│   │   ├── .gitattributes
+│   │   ├── .gitignore
+│   │   ├── actions
+│   │   ├── CODEOWNERS
+│   │   ├── dependabot.yml
+│   │   ├── graphql-inspector.yml
+│   │   └── workflows
+│   ├── .gitignore
+│   ├── .golangci.yml
+│   ├── .goreleaser.common.yml
+│   ├── .goreleaser.nightly.yml
+│   ├── .goreleaser.prerelease.yml
+│   ├── .goreleaser.yml
+│   ├── .markdownlint.yaml
+│   ├── .ruff.toml
+│   ├── .trivyignore
+│   ├── analytics
+│   │   └── analytics.go
+│   ├── auth
+│   │   ├── registry.go
+│   │   └── registry_test.go
+│   ├── CHANGELOG.md
+│   ├── cmd
+│   │   ├── codegen
+│   │   ├── dagger
+│   │   ├── dialstdio
+│   │   ├── dnsname
+│   │   ├── dump-id
+│   │   ├── dump-labels
+│   │   ├── engine
+│   │   ├── init
+│   │   ├── introspect
+│   │   └── json-schema
+│   ├── CODE_OF_CONDUCT.md
+│   ├── CONTRIBUTING.md
+│   ├── core
+│   │   ├── address.go
+│   │   ├── builtincontainer.go
+│   │   ├── c2h.go
+│   │   ├── cache.go
+│   │   ├── cacheref.go
+│   │   ├── changeset.go
+│   │   ├── changeset_git.go
+│   │   ├── changeset_git_test.go
+│   │   ├── changeset_test.go
+│   │   ├── checks.go
+│   │   ├── client_resource.go
+│   │   ├── cloud.go
+│   │   ├── codegen.go
+│   │   ├── container.go
+│   │   ├── container_emulator.go
+│   │   ├── container_exec.go
+│   │   ├── containersource
+│   │   ├── contenthash.go
+│   │   ├── dagop.go
+│   │   ├── directory.go
+│   │   ├── docs
+│   │   ├── dotenv
+│   │   ├── engine.go
+│   │   ├── enum.go
+│   │   ├── env.go
+│   │   ├── envfile.go
+│   │   ├── environment-api.md
+│   │   ├── envvars.go
+│   │   ├── error.go
+│   │   ├── error_test.go
+│   │   ├── file.go
+│   │   ├── generators.go
+│   │   ├── git.go
+│   │   ├── git_local.go
+│   │   ├── git_remote.go
+│   │   ├── git_remote_test.go
+│   │   ├── gqlformat.go
+│   │   ├── gqlformat_test.go
+│   │   ├── healthcheck.go
+│   │   ├── host.go
+│   │   ├── http.go
+│   │   ├── ids.go
+│   │   ├── integration
+│   │   ├── interface.go
+│   │   ├── json.go
+│   │   ├── jsonvalue.go
+│   │   ├── llm.go
+│   │   ├── llm_anthropic.go
+│   │   ├── llm_docs.md
+│   │   ├── llm_google.go
+│   │   ├── llm_openai.go
+│   │   ├── llm_replay.go
+│   │   ├── llm_test.go
+│   │   ├── mcp.go
+│   │   ├── mcpclient.go
+│   │   ├── mcpserver.go
+│   │   ├── moddeps.go
+│   │   ├── modfunc.go
+│   │   ├── modtree.go
+│   │   ├── modtree_test.go
+│   │   ├── modtypes.go
+│   │   ├── module.go
+│   │   ├── modulerefs.go
+│   │   ├── modulerefs_test.go
+│   │   ├── modules
+│   │   ├── modulesource.go
+│   │   ├── modulesource_test.go
+│   │   ├── net.go
+│   │   ├── object.go
+│   │   ├── openrouter
+│   │   ├── platform.go
+│   │   ├── postcall.go
+│   │   ├── prompts
+│   │   ├── query.go
+│   │   ├── schema
+│   │   ├── sdk
+│   │   ├── sdk.go
+│   │   ├── search.go
+│   │   ├── secret.go
+│   │   ├── secret_test.go
+│   │   ├── service.go
+│   │   ├── services.go
+│   │   ├── services_test.go
+│   │   ├── socket.go
+│   │   ├── ssh_auth_socket.go
+│   │   ├── telemetry.go
+│   │   ├── telemetry_test.go
+│   │   ├── terminal.go
+│   │   ├── toolchain.go
+│   │   ├── tracing.go
+│   │   ├── typedef.go
+│   │   ├── typedef_test.go
+│   │   ├── util.go
+│   │   ├── void.go
+│   │   └── workspace.go
+│   ├── dagger.json
+│   ├── dagql
+│   │   ├── builtins.go
+│   │   ├── cache.go
+│   │   ├── cache_test.go
+│   │   ├── cachekey.go
+│   │   ├── call
+│   │   ├── dagql_test.go
+│   │   ├── dagui
+│   │   ├── db
+│   │   ├── directives.go
+│   │   ├── errors.go
+│   │   ├── idtui
+│   │   ├── idwalk.go
+│   │   ├── internal
+│   │   ├── internal.go
+│   │   ├── introspection
+│   │   ├── nullables.go
+│   │   ├── objects.go
+│   │   ├── resultlist.go
+│   │   ├── server.go
+│   │   ├── session_cache.go
+│   │   ├── session_cache_test.go
+│   │   ├── testdata
+│   │   ├── tracing.go
+│   │   └── types.go
+│   ├── docs
+│   │   ├── .gitattributes
+│   │   ├── .gitignore
+│   │   ├── .markdownlintignore
+│   │   ├── _README.md
+│   │   ├── archived_docs
+│   │   ├── ARCHIVING.md
+│   │   ├── babel.config.js
+│   │   ├── current_docs
+│   │   ├── docs-graphql
+│   │   ├── doctum-config.php
+│   │   ├── docusaurus.config.ts
+│   │   ├── netlify.toml
+│   │   ├── nginx.conf
+│   │   ├── package.json
+│   │   ├── plugins
+│   │   ├── predicates
+│   │   ├── recorder
+│   │   ├── recorder2
+│   │   ├── sidebars.ts
+│   │   ├── src
+│   │   ├── static
+│   │   ├── STYLE_GUIDE.md
+│   │   ├── tsconfig.json
+│   │   ├── versions.json
+│   │   └── yarn.lock
+│   ├── engine
+│   │   ├── buildkit
+│   │   ├── cache
+│   │   ├── client
+│   │   ├── clientdb
+│   │   ├── config
+│   │   ├── consts.go
+│   │   ├── contenthash
+│   │   ├── distconsts
+│   │   ├── ebpf
+│   │   ├── filesync
+│   │   ├── opts.go
+│   │   ├── server
+│   │   ├── session
+│   │   ├── slog
+│   │   ├── sources
+│   │   ├── telemetry
+│   │   ├── vcs
+│   │   ├── version.go
+│   │   └── version_test.go
+│   ├── evals
+│   │   └── .gitignore
+│   ├── go.mod
+│   ├── go.sum
+│   ├── hack
+│   │   ├── build
+│   │   ├── bump-otel
+│   │   ├── dev
+│   │   ├── evals
+│   │   ├── most-tests
+│   │   └── with-dev
+│   ├── helm
+│   │   └── dagger
+│   ├── install.ps1
+│   ├── install.sh
+│   ├── internal
+│   │   ├── buildkit
+│   │   ├── cloud
+│   │   ├── fsutil
+│   │   └── testutil
+│   ├── lib
+│   │   └── dagger
+│   ├── LICENSE
+│   ├── modules
+│   │   ├── alpine
+│   │   ├── claude
+│   │   ├── daggerverse
+│   │   ├── dev
+│   │   ├── doug
+│   │   ├── evals
+│   │   ├── evaluator
+│   │   ├── gha
+│   │   ├── git-releaser
+│   │   ├── metrics
+│   │   ├── ps-analyzer
+│   │   ├── ruff
+│   │   ├── shellcheck
+│   │   └── wolfi
+│   ├── network
+│   │   ├── bridge.go
+│   │   ├── consts.go
+│   │   ├── hosts.go
+│   │   └── netinst
+│   ├── NOTICE
+│   ├── README.md
+│   ├── RELEASING.md
+│   ├── sdk
+│   │   ├── CONTRIBUTING.md
+│   │   ├── cue
+│   │   ├── dang
+│   │   ├── dotnet
+│   │   ├── elixir
+│   │   ├── go
+│   │   ├── java
+│   │   ├── php
+│   │   ├── python
+│   │   ├── rust
+│   │   └── typescript
+│   ├── skills
+│   │   ├── cache-expert
+│   │   ├── dagger-chores
+│   │   ├── dagger-codegen
+│   │   └── dagger-design-proposals
+│   ├── toolchains
+│   │   ├── all-sdks
+│   │   ├── changelog
+│   │   ├── ci
+│   │   ├── cli-dev
+│   │   ├── docs-dev
+│   │   ├── dotnet-sdk-dev
+│   │   ├── elixir-sdk-dev
+│   │   ├── engine-dev
+│   │   ├── go
+│   │   ├── go-sdk-dev
+│   │   ├── helm-dev
+│   │   ├── installers
+│   │   ├── java-sdk-dev
+│   │   ├── php-sdk-dev
+│   │   ├── python-sdk-dev
+│   │   ├── release
+│   │   ├── rust-sdk-dev
+│   │   ├── security
+│   │   ├── test-split
+│   │   └── typescript-sdk-dev
+│   ├── util
+│   │   ├── cleanups
+│   │   ├── containerutil
+│   │   ├── ctrns
+│   │   ├── fsxutil
+│   │   ├── gitutil
+│   │   ├── grpcutil
+│   │   ├── hashutil
+│   │   ├── netrc
+│   │   ├── parallel
+│   │   ├── patchpreview
+│   │   ├── patternmatcher
+│   │   ├── scrub
+│   │   ├── sortutil
+│   │   └── traceexec
+│   └── version
+│       ├── .gitattributes
+│       ├── .gitignore
+│       ├── dagger.json
+│       ├── go.mod
+│       ├── go.sum
+│       └── main.go
+├── GEMINI.md
+├── greenpipeline
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-314.pyc
+│   │   ├── _paths.cpython-314.pyc
+│   │   ├── carbon.cpython-314.pyc
+│   │   ├── gitlab_comment.cpython-314.pyc
+│   │   ├── optimizer.cpython-314.pyc
+│   │   ├── parser.cpython-314.pyc
+│   │   ├── patch_generator.cpython-314.pyc
+│   │   ├── pipeline_runner.cpython-314.pyc
+│   │   └── visualizer.cpython-314.pyc
+│   ├── _paths.py
+│   ├── agents
+│   │   ├── __pycache__
+│   │   └── reasoning_agent.py
+│   ├── carbon.py
+│   ├── dashboard.py
+│   ├── examples_magic_feature.py
+│   ├── gitlab_comment.py
+│   ├── optimizer.py
+│   ├── parser.py
+│   ├── patch_generator.py
+│   ├── pipeline_runner.py
+│   ├── requirements.txt
+│   ├── samples
+│   │   ├── gitlab_optimized.yml
+│   │   ├── gitlab_real.yml
+│   │   ├── OPTIMIZATION_REPORT.md
+│   │   ├── README.md
+│   │   └── sample_pipeline.yml
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── test_carbon.py
+│   │   ├── test_optimizer.py
+│   │   ├── test_parser.py
+│   │   └── test_runner.py
+│   └── visualizer.py
+├── IMPLEMENTATION_SUMMARY.md
+├── JUDGE_DEMO.md
+├── MAGIC_FEATURE.md
+├── MAGIC_FEATURE_COMPLETE.md
+├── pipeline-graph-view-plugin
+│   ├── .editorconfig
+│   ├── .git
+│   │   ├── config
+│   │   ├── description
+│   │   ├── FETCH_HEAD
+│   │   ├── HEAD
+│   │   ├── hooks
+│   │   ├── index
+│   │   ├── info
+│   │   ├── logs
+│   │   ├── objects
+│   │   ├── packed-refs
+│   │   └── refs
+│   ├── .git-blame-ignore-revs
+│   ├── .github
+│   │   ├── CODEOWNERS
+│   │   ├── renovate.json
+│   │   └── workflows
+│   ├── .gitignore
+│   ├── .idea
+│   │   └── icon.svg
+│   ├── .mvn
+│   │   ├── extensions.xml
+│   │   └── maven.config
+│   ├── .mvn_exec_node
+│   ├── .prettierignore
+│   ├── .prettierrc.json
+│   ├── .vscode
+│   │   ├── .gitignore
+│   │   ├── extensions.json
+│   │   ├── launch.json
+│   │   ├── settings.json
+│   │   └── tasks.json
+│   ├── CONTRIBUTING.md
+│   ├── crowdin.yml
+│   ├── docs
+│   │   └── images
+│   ├── eslint.config.js
+│   ├── Jenkinsfile
+│   ├── LICENSE.md
+│   ├── openapi.yaml
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── pom.xml
+│   ├── README.md
+│   ├── src
+│   │   ├── main
+│   │   └── test
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── vitest.config.ts
+├── PROJECT_PLAN.md
+├── QUICK_START_MAGIC_FEATURE.md
+├── README.md
+├── sci-guide
+│   ├── .git
+│   │   ├── config
+│   │   ├── description
+│   │   ├── FETCH_HEAD
+│   │   ├── gk
+│   │   ├── HEAD
+│   │   ├── hooks
+│   │   ├── index
+│   │   ├── info
+│   │   ├── logs
+│   │   ├── objects
+│   │   ├── packed-refs
+│   │   └── refs
+│   ├── .github
+│   │   ├── ISSUE_TEMPLATE
+│   │   └── workflows
+│   ├── .gitignore
+│   ├── babel.config.js
+│   ├── CNAME
+│   ├── CODE-OF-CONDUCT.md
+│   ├── CONFIGURE.md
+│   ├── CONTRIBUTING.md
+│   ├── docs
+│   │   ├── CaseStudies.md
+│   │   ├── E
+│   │   ├── GettingStarted.md
+│   │   ├── I
+│   │   ├── index.mdx
+│   │   ├── M
+│   │   ├── R
+│   │   ├── 'Review Process'
+│   │   └── SCI
+│   ├── docusaurus.config.js
+│   ├── LICENSE
+│   ├── package.json
+│   ├── README.md
+│   ├── sidebars.js
+│   ├── src
+│   │   ├── components
+│   │   ├── css
+│   │   ├── imgs
+│   │   └── theme
+│   ├── static
+│   │   ├── .nojekyll
+│   │   ├── CNAME
+│   │   └── img
+│   ├── tsconfig.json
+│   ├── use-case-submissions
+│   │   ├── AFAS_case_study.md
+│   │   ├── Automated_SCI_Measurements_with_Green_Metrics_Tool.md
+│   │   ├── AVEVA_case_study.md
+│   │   ├── CAST_use_case.md
+│   │   ├── dow-msft-Graph-DB.md
+│   │   ├── 'Endava-Fraud Detection API case study.md'
+│   │   ├── farm-insights-Raspberry-Pi.md
+│   │   ├── msft-eShoppen.md
+│   │   ├── msft-green-ai.md
+│   │   ├── nttdatta-On-Premise-Web-system.md
+│   │   ├── Trustwise-case-study.md
+│   │   └── UBS_SCI_use_case.md
+│   └── yarn.lock
+├── structure.txt
+└── SWE-bench
+    ├── .git
+    │   ├── config
+    │   ├── description
+    │   ├── FETCH_HEAD
+    │   ├── HEAD
+    │   ├── hooks
+    │   ├── index
+    │   ├── info
+    │   ├── logs
+    │   ├── objects
+    │   ├── packed-refs
+    │   └── refs
+    ├── .github
+    │   ├── ISSUE_TEMPLATE
+    │   ├── PULL_REQUEST_TEMPLATE.md
+    │   └── workflows
+    ├── .gitignore
+    ├── .pre-commit-config.yaml
+    ├── CHANGELOG.md
+    ├── codecov.yml
+    ├── docs
+    │   ├── api
+    │   ├── assets
+    │   ├── blog
+    │   ├── css
+    │   ├── faq.md
+    │   ├── guides
+    │   ├── index.md
+    │   ├── installation.md
+    │   ├── other_languages
+    │   ├── README.md
+    │   └── reference
+    ├── LICENSE
+    ├── mkdocs.yml
+    ├── pyproject.toml
+    ├── README.md
+    ├── swebench
+    │   ├── __init__.py
+    │   ├── __pycache__
+    │   ├── collect
+    │   ├── harness
+    │   ├── inference
+    │   ├── resources
+    │   └── versioning
+    └── tests
+        ├── __pycache__
+        ├── test_cli.py
+        ├── test_collect_cli.py
+        ├── test_data
+        ├── test_evaluation.py
+        ├── test_harness_utils.py
+        └── test_log_parsers_java.py

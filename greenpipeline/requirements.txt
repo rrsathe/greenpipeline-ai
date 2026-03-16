@@ -1,0 +1,6 @@
+pyyaml>=6.0
+networkx>=3.0
+matplotlib>=3.7
+streamlit>=1.28
+codecarbon>=2.3
+psutil>=5.9

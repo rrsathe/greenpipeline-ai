@@ -1,0 +1,15 @@
+[submodule "external/SWE-bench"]
+	path = external/SWE-bench
+	url = https://github.com/SWE-bench/SWE-bench.git
+[submodule "external/codecarbon"]
+	path = external/codecarbon
+	url = https://github.com/mlco2/codecarbon.git
+[submodule "external/sci-guide"]
+	path = external/sci-guide
+	url = https://github.com/Green-Software-Foundation/sci-guide.git
+[submodule "external/dagger"]
+	path = external/dagger
+	url = https://github.com/dagger/dagger.git
+[submodule "external/AIOpsLab"]
+	path = external/AIOpsLab
+	url = https://github.com/microsoft/AIOpsLab.git

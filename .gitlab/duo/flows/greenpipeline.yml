@@ -1,0 +1,15 @@
+name: GreenPipeline AI
+description: Multi-agent flow that analyzes CI/CD pipelines and optimizes them for speed and sustainability.
+
+agents:
+  - pipeline-analyzer
+  - optimization-estimator
+  - reasoning-agent
+  - carbon-estimator
+  - patch-generator
+
+trigger:
+  type: mention
+  keywords:
+    - "@greenpipeline analyze"
+    - "@greenpipeline optimize"
