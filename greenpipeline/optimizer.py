@@ -9,8 +9,6 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 
-import networkx as nx
-
 from greenpipeline import OptimizationReport, PipelineDAG, Suggestion
 
 logger = logging.getLogger(__name__)
@@ -158,9 +156,7 @@ def detect_redundant_jobs(dag: PipelineDAG) -> list[Suggestion]:
     return suggestions
 
 
-def estimate_time_savings(
-    dag: PipelineDAG, suggestions: list[Suggestion]
-) -> float:
+def estimate_time_savings(dag: PipelineDAG, suggestions: list[Suggestion]) -> float:
     """Compute total estimated time savings from all suggestions.
 
     Avoids double-counting by capping savings at half the critical-path time.
@@ -168,6 +164,3 @@ def estimate_time_savings(
     raw_saving = sum(s.estimated_saving_min for s in suggestions)
     # Cap at 60% of critical path to avoid unrealistic estimates
     return min(raw_saving, dag.critical_path_min * 0.6)
-
-
-

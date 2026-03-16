@@ -10,8 +10,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from greenpipeline.pipeline_runner import run_analysis
 from greenpipeline.gitlab_comment import generate_gitlab_comment_with_patch
+from greenpipeline.pipeline_runner import run_analysis
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
         base_dir = Path(__file__).parent
     except NameError:
         base_dir = Path("greenpipeline")
-        
+
     sample_path = base_dir / "samples" / "sample_pipeline.yml"
     result = run_analysis(yaml_path=sample_path)
 
@@ -61,7 +61,9 @@ def main():
     print(" 4. JSON Metrics Export")
     print("=" * 60)
     metrics = {
-        "efficiency_score": result.reasoning.efficiency_score if result.reasoning else 0,
+        "efficiency_score": result.reasoning.efficiency_score
+        if result.reasoning
+        else 0,
         "runtime_min": result.optimization.original_runtime_min,
         "optimized_runtime_min": result.optimization.optimized_runtime_min,
         "saving_min": result.optimization.total_saving_min,

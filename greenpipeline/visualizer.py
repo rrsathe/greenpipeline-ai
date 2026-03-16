@@ -36,8 +36,14 @@ _STAGE_COLOURS: dict[str, str] = {
 
 _DEFAULT_COLOUR = "#95A5A6"
 _EXTRA_PALETTE = [
-    "#8E44AD", "#2ECC71", "#E74C3C", "#3498DB",
-    "#F39C12", "#1ABC9C", "#D35400", "#2C3E50",
+    "#8E44AD",
+    "#2ECC71",
+    "#E74C3C",
+    "#3498DB",
+    "#F39C12",
+    "#1ABC9C",
+    "#D35400",
+    "#2C3E50",
 ]
 
 
@@ -111,8 +117,16 @@ def draw_pipeline_dag(
     ax.set_facecolor("#1E1E2E")
 
     if not G.nodes:
-        ax.text(0.5, 0.5, "Empty pipeline", ha="center", va="center",
-                color="white", fontsize=16, transform=ax.transAxes)
+        ax.text(
+            0.5,
+            0.5,
+            "Empty pipeline",
+            ha="center",
+            va="center",
+            color="white",
+            fontsize=16,
+            transform=ax.transAxes,
+        )
         return fig
 
     pos = get_dag_layout(dag)
@@ -134,21 +148,37 @@ def draw_pipeline_dag(
     stage_edges = [(u, v) for u, v, d in G.edges(data=True) if d.get("type") != "needs"]
 
     nx.draw_networkx_edges(
-        G, pos, edgelist=stage_edges, ax=ax,
-        edge_color="#555555", alpha=0.6, width=1.5,
-        arrows=True, arrowsize=15, style="solid",
+        G,
+        pos,
+        edgelist=stage_edges,
+        ax=ax,
+        edge_color="#555555",
+        alpha=0.6,
+        width=1.5,
+        arrows=True,
+        arrowsize=15,
+        style="solid",
         connectionstyle="arc3,rad=0.1",
     )
     nx.draw_networkx_edges(
-        G, pos, edgelist=needs_edges, ax=ax,
-        edge_color="#AAAAAA", alpha=0.8, width=2.0,
-        arrows=True, arrowsize=15, style="dashed",
+        G,
+        pos,
+        edgelist=needs_edges,
+        ax=ax,
+        edge_color="#AAAAAA",
+        alpha=0.8,
+        width=2.0,
+        arrows=True,
+        arrowsize=15,
+        style="dashed",
         connectionstyle="arc3,rad=0.1",
     )
 
     # Draw nodes
     nx.draw_networkx_nodes(
-        G, pos, ax=ax,
+        G,
+        pos,
+        ax=ax,
         node_color=node_colors,
         node_size=node_sizes,
         alpha=0.9,
@@ -163,38 +193,51 @@ def draw_pipeline_dag(
         labels[n] = f"{n}\n({rt:.1f}m)"
 
     nx.draw_networkx_labels(
-        G, pos, labels, ax=ax,
-        font_size=7, font_color="white", font_weight="bold",
+        G,
+        pos,
+        labels,
+        ax=ax,
+        font_size=7,
+        font_color="white",
+        font_weight="bold",
     )
 
     # Legend
-    all_stages = list(dict.fromkeys(
-        G.nodes[n].get("stage", "unknown") for n in G.nodes
-    ))
+    all_stages = list(
+        dict.fromkeys(G.nodes[n].get("stage", "unknown") for n in G.nodes)
+    )
     legend_patches = [
-        mpatches.Patch(
-            color=_colour_for_stage(s, extra_colours), label=s.capitalize()
-        )
+        mpatches.Patch(color=_colour_for_stage(s, extra_colours), label=s.capitalize())
         for s in all_stages
     ]
     legend_patches.append(mpatches.Patch(color="#555555", label="Stage order"))
     legend_patches.append(mpatches.Patch(color="#AAAAAA", label="Explicit needs"))
     ax.legend(
-        handles=legend_patches, loc="upper left",
-        fontsize=8, facecolor="#2D2D44", edgecolor="#555555",
+        handles=legend_patches,
+        loc="upper left",
+        fontsize=8,
+        facecolor="#2D2D44",
+        edgecolor="#555555",
         labelcolor="white",
     )
 
     ax.set_title(
         "Pipeline DAG",
-        fontsize=16, fontweight="bold", color="white", pad=15,
+        fontsize=16,
+        fontweight="bold",
+        color="white",
+        pad=15,
     )
     ax.axis("off")
     fig.tight_layout()
 
     if output_path:
-        fig.savefig(str(output_path), dpi=150, bbox_inches="tight",
-                    facecolor=fig.get_facecolor())
+        fig.savefig(
+            str(output_path),
+            dpi=150,
+            bbox_inches="tight",
+            facecolor=fig.get_facecolor(),
+        )
         logger.info("Saved DAG visualization to %s", output_path)
 
     return fig
@@ -214,7 +257,8 @@ def export_dag_image(fig: plt.Figure, path: str | Path) -> str:
 def fig_to_bytes(fig: plt.Figure) -> bytes:
     """Convert a matplotlib figure to PNG bytes (useful for Streamlit)."""
     buf = BytesIO()
-    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight",
-                facecolor=fig.get_facecolor())
+    fig.savefig(
+        buf, format="png", dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor()
+    )
     buf.seek(0)
     return buf.read()

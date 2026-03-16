@@ -10,9 +10,9 @@ def generate_gitlab_comment(result: PipelineResult) -> str:
     report = result.optimization
     carbon = result.carbon
     reasoning = result.reasoning
-    
+
     score = reasoning.efficiency_score if reasoning else 0
-    
+
     if reasoning and reasoning.explanations:
         suggestions = "\n".join(f"- {s}" for s in reasoning.explanations)
     elif report.suggestions:
@@ -40,10 +40,10 @@ def generate_gitlab_comment(result: PipelineResult) -> str:
 def generate_gitlab_comment_with_patch(result: PipelineResult) -> str:
     """Generate the MR comment and append the optimized YAML patch inline."""
     comment = generate_gitlab_comment(result)
-    
+
     if not result.optimized_yaml:
         return comment
-        
+
     return f"""{comment}
 
 ---

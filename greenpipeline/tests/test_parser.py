@@ -5,7 +5,12 @@ from pathlib import Path
 import networkx as nx
 import pytest
 
-from greenpipeline.parser import build_dag, extract_jobs, extract_stages, parse_gitlab_ci
+from greenpipeline.parser import (
+    build_dag,
+    extract_jobs,
+    extract_stages,
+    parse_gitlab_ci,
+)
 
 _SAMPLE = Path(__file__).resolve().parent.parent / "samples" / "sample_pipeline.yml"
 
@@ -80,6 +85,9 @@ class TestBuildDag:
         assert dag.stages == ["build", "test", "security", "deploy"]
 
     def test_no_crash_on_minimal_yaml(self):
-        config = {"stages": ["build"], "job_a": {"stage": "build", "script": ["echo hello"]}}
+        config = {
+            "stages": ["build"],
+            "job_a": {"stage": "build", "script": ["echo hello"]},
+        }
         dag = build_dag(config)
         assert len(dag.graph.nodes) == 1

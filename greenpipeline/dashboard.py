@@ -19,10 +19,9 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-import greenpipeline._paths  # noqa: F401,E402 — activate local repo paths (codecarbon, AIOpsLab, dagger)
-
 import streamlit as st  # noqa: E402
 
+import greenpipeline._paths  # noqa: F401,E402 — activate local repo paths (codecarbon, AIOpsLab, dagger)
 from greenpipeline.pipeline_runner import run_analysis  # noqa: E402
 from greenpipeline.visualizer import draw_pipeline_dag  # noqa: E402
 
@@ -135,7 +134,8 @@ with st.sidebar:
     st.markdown("---")
 
     uploaded = st.file_uploader(
-        "Upload `.gitlab-ci.yml`", type=["yml", "yaml"],
+        "Upload `.gitlab-ci.yml`",
+        type=["yml", "yaml"],
         help="Upload your GitLab CI pipeline definition",
     )
     use_sample = st.checkbox("Use sample pipeline", value=True)
@@ -184,7 +184,9 @@ if run_btn:
     carbon = result.carbon
 
     # ---- Summary metrics ----
-    st.markdown('<div class="section-header">📊 Pipeline Summary</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-header">📊 Pipeline Summary</div>', unsafe_allow_html=True
+    )
     c1, c2, c3, c4 = st.columns(4)
 
     with c1:
@@ -225,20 +227,25 @@ if run_btn:
         )
 
     # ---- DAG Visualization ----
-    st.markdown('<div class="section-header">🔗 Pipeline Dependency Graph</div>', unsafe_allow_html=True)
-    
+    st.markdown(
+        '<div class="section-header">🔗 Pipeline Dependency Graph</div>',
+        unsafe_allow_html=True,
+    )
+
     # Display DAG statistics for debugging
     if dag.graph and dag.graph.nodes:
         st.write(
             f"**Nodes:** {len(dag.graph.nodes)} | **Edges:** {len(dag.graph.edges)}"
         )
-    
+
     # Safety check before rendering
     if dag and dag.graph and len(dag.graph.nodes) > 0:
         fig = draw_pipeline_dag(dag)
         st.pyplot(fig, width="stretch")
     else:
-        st.warning("⚠️ Pipeline DAG could not be visualized. Check if pipeline was parsed correctly.")
+        st.warning(
+            "⚠️ Pipeline DAG could not be visualized. Check if pipeline was parsed correctly."
+        )
 
     # ---- Optimization Recommendations ----
     st.markdown(
@@ -270,7 +277,7 @@ if run_btn:
 
     if result.reasoning:
         score = result.reasoning.efficiency_score
-        
+
         # Color score
         if score >= 80:
             score_color = "#6ee7b7"  # Green
@@ -278,7 +285,7 @@ if run_btn:
             score_color = "#f59e0b"  # Yellow
         else:
             score_color = "#ef4444"  # Red
-            
+
         c1, c2 = st.columns([1, 3])
         with c1:
             st.markdown(
@@ -289,9 +296,11 @@ if run_btn:
                 </div>""",
                 unsafe_allow_html=True,
             )
-            
+
         with c2:
-            st.markdown('<div style="padding-top: 0.5rem;"></div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div style="padding-top: 0.5rem;"></div>', unsafe_allow_html=True
+            )
             for explanation in result.reasoning.explanations:
                 st.info(explanation, icon="💡")
     else:
@@ -335,8 +344,12 @@ if run_btn:
 
     # Yearly impact calculation
     runs_per_day = 100
-    yearly_saving_kg = (carbon.current_emissions_kg - carbon.optimized_emissions_kg) * runs_per_day * 365
-    
+    yearly_saving_kg = (
+        (carbon.current_emissions_kg - carbon.optimized_emissions_kg)
+        * runs_per_day
+        * 365
+    )
+
     st.metric(
         "Estimated yearly CO₂ saving (100 runs/day)",
         f"{yearly_saving_kg:.2f} kg CO₂",
@@ -358,10 +371,16 @@ if run_btn:
         edgecolor="#334155",
     )
 
-    for bar, val in zip(bars, [carbon.optimized_emissions_kg, carbon.current_emissions_kg]):
+    for bar, val in zip(
+        bars, [carbon.optimized_emissions_kg, carbon.current_emissions_kg]
+    ):
         ax.text(
-            bar.get_width() + 0.0001, bar.get_y() + bar.get_height() / 2,
-            f" {val:.4f} kg CO₂", va="center", color="white", fontsize=10,
+            bar.get_width() + 0.0001,
+            bar.get_y() + bar.get_height() / 2,
+            f" {val:.4f} kg CO₂",
+            va="center",
+            color="white",
+            fontsize=10,
         )
 
     ax.set_xlabel("kg CO₂", color="#94a3b8")
@@ -378,11 +397,13 @@ if run_btn:
         '<div class="section-header">🛠 Suggested Pipeline Patch</div>',
         unsafe_allow_html=True,
     )
-    
+
     if result.optimized_yaml:
-        st.markdown("**Apply these changes to your `.gitlab-ci.yml` for immediate improvements:**")
+        st.markdown(
+            "**Apply these changes to your `.gitlab-ci.yml` for immediate improvements:**"
+        )
         st.code(result.optimized_yaml, language="yaml")
-        
+
         # Download button
         st.download_button(
             label="📥 Download Optimized Pipeline",

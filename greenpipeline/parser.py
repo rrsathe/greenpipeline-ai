@@ -62,7 +62,9 @@ def parse_gitlab_ci(yaml_path: str | Path) -> dict[str, Any]:
     with open(path, "r", encoding="utf-8") as fh:
         config: dict = yaml.safe_load(fh)
     if not isinstance(config, dict):
-        raise ValueError(f"Expected YAML mapping at top level, got {type(config).__name__}")
+        raise ValueError(
+            f"Expected YAML mapping at top level, got {type(config).__name__}"
+        )
     return config
 
 

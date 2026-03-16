@@ -8,21 +8,19 @@ from __future__ import annotations
 from greenpipeline import OptimizationReport, ReasoningReport
 
 
-def calculate_efficiency_score(report: OptimizationReport) -> tuple[int, dict[str, int]]:
+def calculate_efficiency_score(
+    report: OptimizationReport,
+) -> tuple[int, dict[str, int]]:
     """Calculate a heuristic Pipeline Efficiency Score out of 100.
-    
+
     Deducts points based on the number and type of inefficiencies found.
     - Missing cache: -10 points each (max -30)
     - Sequential bottlenecks: -15 points each (max -45)
     - Redundant jobs: -20 points each (max -40)
     """
     score = 100
-    breakdown = {
-        "Parallelization": 50,
-        "Caching": 30,
-        "Redundancy": 20
-    }
-    
+    breakdown = {"Parallelization": 50, "Caching": 30, "Redundancy": 20}
+
     for suggestion in report.suggestions:
         if suggestion.category == "caching":
             deduction = min(10, breakdown["Caching"])
@@ -36,7 +34,7 @@ def calculate_efficiency_score(report: OptimizationReport) -> tuple[int, dict[st
             deduction = min(20, breakdown["Redundancy"])
             breakdown["Redundancy"] -= deduction
             score -= deduction
-            
+
     return max(0, score), breakdown
 
 
@@ -62,7 +60,7 @@ def generate_reasoning(report: OptimizationReport) -> ReasoningReport:
                 "other, using the `needs:` keyword allows them to run concurrently "
                 "in parallel, significantly reducing overall pipeline wall-clock time."
             )
-            
+
         elif suggestion.category == "redundancy":
             jobs_str = ", ".join(suggestion.affected_jobs)
             explanations.append(
@@ -73,7 +71,7 @@ def generate_reasoning(report: OptimizationReport) -> ReasoningReport:
             )
 
     score, breakdown = calculate_efficiency_score(report)
-    
+
     if not explanations:
         explanations.append(
             "Your pipeline is highly optimized! Dependencies are properly cached "
