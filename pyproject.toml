@@ -27,7 +27,17 @@ observability = [
     "codecarbon>=2.3",
 ]
 dashboard = ["streamlit>=1.28"]
-dev = ["ty", "mypy", "pre-commit", "pytest", "ruff"]
+dev = [
+    "ty",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "ruff",
+    "types-networkx",
+    "types-PyYAML",
+]
+
+all = ["greenpipeline[dev,observability,dashboard]"]
 
 [project.scripts]
 greenpipeline = "greenpipeline.pipeline_runner:main"

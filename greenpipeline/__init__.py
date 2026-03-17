@@ -100,6 +100,7 @@ class PipelineResult:
     visualization_path: str | None = None
     session_id: str | None = None
     optimized_yaml: str | None = None
+    simulation_status: str = "ℹ️ Static Analysis Only"
 
 
 __all__ = [

@@ -10,6 +10,7 @@ def generate_gitlab_comment(result: PipelineResult) -> str:
     report = result.optimization
     carbon = result.carbon
     reasoning = result.reasoning
+    simulation_status = result.simulation_status
 
     score = reasoning.efficiency_score if reasoning else 0
 
@@ -21,6 +22,8 @@ def generate_gitlab_comment(result: PipelineResult) -> str:
         suggestions = "No major optimizations detected. Your pipeline is efficient! ✅"
 
     return f"""### 🌿 GreenPipeline AI Report
+
+**Execution Mode**: {simulation_status}
 
 **Pipeline Efficiency Score**: {score}/100
 
