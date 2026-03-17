@@ -1,7 +1,7 @@
-"""Optimization Engine — detect inefficiencies and suggest improvements.
+"""Optimization Engine — detect inefficiencies and suggest structural improvements.
 
 Uses NetworkX graph analysis (critical-path, topology) to identify
-parallelisation opportunities, missing cache, and redundant jobs.
+parallelisation opportunities, missing cache, and pipeline restructuring (hoisting).
 """
 
 from __future__ import annotations
@@ -45,6 +45,11 @@ def analyze_pipeline(dag: PipelineDAG) -> OptimizationReport:
         :class:`OptimizationReport` with suggestions and runtime estimates.
     """
     suggestions: list[Suggestion] = []
+
+    # 1. Structural Transformations
+    suggestions.extend(detect_dependency_hoisting(dag))
+
+    # 2. Local Optimizations
     suggestions.extend(detect_sequential_bottlenecks(dag))
     suggestions.extend(detect_missing_cache(dag))
     suggestions.extend(detect_redundant_jobs(dag))
@@ -58,6 +63,46 @@ def analyze_pipeline(dag: PipelineDAG) -> OptimizationReport:
         optimized_runtime_min=optimized_runtime,
         total_saving_min=total_saving,
     )
+
+
+def detect_dependency_hoisting(dag: PipelineDAG) -> list[Suggestion]:
+    """Identify duplicate dependency installations that can be hoisted.
+
+    If multiple downstream jobs run the exact same heavy setup command
+    (like `npm ci`), suggest extracting it into a single dedicated upstream
+    job that passes the dependencies via cache/artifacts.
+    """
+    suggestions: list[Suggestion] = []
+    install_commands: dict[str, list[str]] = defaultdict(list)
+
+    # Scan all jobs for package manager commands
+    for name, job in dag.jobs.items():
+        for line in job.script:
+            line_clean = line.strip().lower()
+            if any(line_clean.startswith(pat) for pat in _PACKAGE_MANAGER_PATTERNS):
+                install_commands[line_clean].append(name)
+
+    # If an install command is repeated >= 2 times, it's a structural bottleneck
+    for command, jobs in install_commands.items():
+        if len(jobs) >= 2:
+            saving_per_job = 1.0  # Heuristic: npm ci / pip install takes ~1 min
+            total_saving = saving_per_job * (len(jobs) - 1)  # Save time on N-1 jobs
+
+            suggestions.append(
+                Suggestion(
+                    category="hoisting",
+                    description=(
+                        f"Structural Refactor: The command `{command}` is executed redundantly across "
+                        f"{len(jobs)} jobs ({', '.join(jobs)}). Hoist this into a single 'prepare_dependencies' "
+                        f"job in an early stage, and pass the output to these jobs via `needs:` and artifacts/cache. "
+                        f"This eliminates duplicate network egress and compute."
+                    ),
+                    affected_jobs=jobs,
+                    estimated_saving_min=total_saving,
+                )
+            )
+
+    return suggestions
 
 
 def detect_sequential_bottlenecks(dag: PipelineDAG) -> list[Suggestion]:
@@ -91,7 +136,8 @@ def detect_sequential_bottlenecks(dag: PipelineDAG) -> list[Suggestion]:
                         description=(
                             f"In stage '{stage}', jobs {no_needs} run sequentially because "
                             f"GitLab enforces stage ordering. Adding `needs:` allows them "
-                            f"to run in parallel and reduces pipeline runtime by ~{saving:.1f} min."
+                            f"to run concurrently, decoupling them from stage synchronization barriers "
+                            f"and reducing pipeline critical path by ~{saving:.1f} min."
                         ),
                         affected_jobs=no_needs,
                         estimated_saving_min=saving,
@@ -116,7 +162,8 @@ def detect_missing_cache(dag: PipelineDAG) -> list[Suggestion]:
                         category="caching",
                         description=(
                             f"Job '{name}' uses '{pattern}' but has no cache "
-                            f"configured. Adding cache can save ~0.5–2 min per run."
+                            f"configured. Without caching, registry packages are re-downloaded "
+                            f"over the network every pipeline run."
                         ),
                         affected_jobs=[name],
                         estimated_saving_min=1.0,
