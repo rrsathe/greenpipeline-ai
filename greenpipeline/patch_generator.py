@@ -35,9 +35,7 @@ def detect_cache_path(script_lines: list[str]) -> str:
         return "vendor/"
 
 
-def generate_patch(
-    original_config: dict, dag: PipelineDAG, opt: OptimizationReport
-) -> str:
+def generate_patch(original_config: dict, dag: PipelineDAG, opt: OptimizationReport) -> str:
     """Generate a complete optimized .gitlab-ci.yml patch as a string.
 
     Args:
@@ -72,38 +70,35 @@ def generate_patch(
 
         elif suggestion.category == "parallelization":
             for job_name in suggestion.affected_jobs:
-                if job_name in config and isinstance(config[job_name], dict):
-                    if dag.graph is not None:
-                        # Find dependencies from previous stages
-                        job_info = dag.jobs.get(job_name)
-                        if job_info is not None:
-                            stage_idx = (
-                                dag.stages.index(job_info.stage)
-                                if job_info.stage in dag.stages
-                                else 0
+                if (
+                    job_name in config
+                    and isinstance(config[job_name], dict)
+                    and dag.graph is not None
+                ):
+                    # Find dependencies from previous stages
+                    job_info = dag.jobs.get(job_name)
+                    if job_info is not None:
+                        stage_idx = (
+                            dag.stages.index(job_info.stage) if job_info.stage in dag.stages else 0
+                        )
+
+                        # Add explicit needs from previous stage to bypass implicit ordering
+                        needs = []
+                        if stage_idx > 0:
+                            prev_stage = dag.stages[stage_idx - 1]
+                            needs = [j for j, info in dag.jobs.items() if info.stage == prev_stage]
+
+                        if needs:
+                            if "needs" not in config[job_name]:
+                                config[job_name]["needs"] = []
+                            for n in needs:
+                                if n not in config[job_name]["needs"]:
+                                    config[job_name]["needs"].append(n)
+                            logger.info(
+                                "Added 'needs' to job %s: %s (for parallelization)",
+                                job_name,
+                                ", ".join(needs),
                             )
-
-                            # Add explicit needs from previous stage to bypass implicit ordering
-                            needs = []
-                            if stage_idx > 0:
-                                prev_stage = dag.stages[stage_idx - 1]
-                                needs = [
-                                    j
-                                    for j, info in dag.jobs.items()
-                                    if info.stage == prev_stage
-                                ]
-
-                            if needs:
-                                if "needs" not in config[job_name]:
-                                    config[job_name]["needs"] = []
-                                for n in needs:
-                                    if n not in config[job_name]["needs"]:
-                                        config[job_name]["needs"].append(n)
-                                logger.info(
-                                    "Added 'needs' to job %s: %s (for parallelization)",
-                                    job_name,
-                                    ", ".join(needs),
-                                )
 
     # Convert back to YAML with nice formatting
     class CustomDumper(yaml.SafeDumper):

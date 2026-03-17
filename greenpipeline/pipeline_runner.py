@@ -11,27 +11,25 @@ Wires parser → optimizer → carbon → visualizer into a single analysis flow
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-# Ensure the project root is on sys.path for direct script execution.
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(_PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(_PROJECT_ROOT))
-
 import logging
 import os
+import sys
 import time
 import uuid
+from pathlib import Path
 from typing import Any, cast
 
-import greenpipeline._paths  # noqa: F401 — activate local repo paths
 from greenpipeline import PipelineResult
 from greenpipeline.carbon import estimate_emissions
 from greenpipeline.optimizer import analyze_pipeline
 from greenpipeline.parser import build_dag, parse_gitlab_ci
 from greenpipeline.patch_generator import generate_patch
 from greenpipeline.visualizer import draw_pipeline_dag, export_dag_image
+
+# Ensure the project root is on sys.path for direct script execution.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 logger = logging.getLogger(__name__)
 
