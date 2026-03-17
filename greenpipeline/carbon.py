@@ -14,10 +14,17 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, cast
+from typing import TYPE_CHECKING, TypedDict
 
-import greenpipeline._paths  # noqa: F401 — activate local repo paths
 from greenpipeline import CarbonReport, PipelineDAG
+
+
+class EmissionEstimate(TypedDict):
+    """Type definition for emission estimation results."""
+
+    emissions_kg: float
+    energy_kwh: float
+
 
 logger = logging.getLogger(__name__)
 _codecarbon_logger = logging.getLogger("codecarbon")
@@ -25,23 +32,25 @@ _codecarbon_logger.setLevel(logging.ERROR)
 _codecarbon_logger.propagate = False
 _codecarbon_logger.disabled = True
 logging.getLogger("codecarbon.emissions_tracker").setLevel(logging.ERROR)
-OfflineEmissionsTracker = cast(Any, None)
-Energy = cast(Any, None)
-EmissionsPerKWh = cast(Any, None)
-Emissions = cast(Any, None)
-DataSource = cast(Any, None)
+
+if TYPE_CHECKING:
+    from codecarbon import OfflineEmissionsTracker
+    from codecarbon.core.emissions import Emissions
+    from codecarbon.core.units import EmissionsPerKWh, Energy
+    from codecarbon.input import DataSource
 
 # ---- Local CodeCarbon imports ----
+_has_codecarbon = False
 try:
     from codecarbon import OfflineEmissionsTracker  # local repo
     from codecarbon.core.emissions import Emissions
     from codecarbon.core.units import EmissionsPerKWh, Energy
     from codecarbon.input import DataSource
 
-    _HAS_CODECARBON = True
+    _has_codecarbon = True
 except Exception as _err:
     logger.warning("Could not import local codecarbon: %s", _err)
-    _HAS_CODECARBON = False
+    _has_codecarbon = False
 
 # Default assumptions
 _DEFAULT_COUNTRY = "USA"
@@ -56,13 +65,13 @@ _FALLBACK_CARBON_INTENSITY = 0.42  # kg CO2 / kWh — US average
 
 def _try_codecarbon_estimate(
     duration_min: float, country: str = _DEFAULT_COUNTRY
-) -> dict:
+) -> EmissionEstimate | dict[str, float]:
     """Use the local CodeCarbon ``OfflineEmissionsTracker`` for estimation.
 
     Returns dict with ``emissions_kg`` and ``energy_kwh``, or empty dict
     on failure.
     """
-    if not _HAS_CODECARBON:
+    if not _has_codecarbon:
         return {}
 
     try:
@@ -101,14 +110,14 @@ def _try_codecarbon_estimate(
 
 def _codecarbon_data_estimate(
     duration_min: float, country: str = _DEFAULT_COUNTRY
-) -> dict:
+) -> EmissionEstimate | dict[str, float]:
     """Use CodeCarbon's ``Emissions`` + ``DataSource`` for emission-factor
     lookup *without* spinning up the full hardware tracker.
 
     This is the lightweight approach — we compute energy from assumed
     power draw and then apply CodeCarbon's country-level carbon intensity.
     """
-    if not _HAS_CODECARBON:
+    if not _has_codecarbon:
         return {}
 
     try:
@@ -140,7 +149,7 @@ def _codecarbon_data_estimate(
         return {}
 
 
-def _fallback_estimate(duration_min: float) -> dict:
+def _fallback_estimate(duration_min: float) -> EmissionEstimate:
     """Simple physics-based fallback when CodeCarbon is unavailable."""
     hours = duration_min / 60.0
     energy_kwh = (_BASE_POWER_WATTS / 1000.0) * hours
@@ -184,9 +193,7 @@ def estimate_emissions(
         :class:`CarbonReport` with current and optimised emissions.
     """
     current_runtime = dag.critical_path_min
-    opt_runtime = (
-        optimized_runtime_min if optimized_runtime_min is not None else current_runtime
-    )
+    opt_runtime = optimized_runtime_min if optimized_runtime_min is not None else current_runtime
 
     # Try each estimator in order of preference
     current_est = _try_codecarbon_estimate(current_runtime, country)

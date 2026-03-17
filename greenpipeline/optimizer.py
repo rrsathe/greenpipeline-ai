@@ -147,9 +147,7 @@ def detect_redundant_jobs(dag: PipelineDAG) -> list[Suggestion]:
                         f"parallel outputs or a shared template."
                     ),
                     affected_jobs=names,
-                    estimated_saving_min=min(
-                        dag.jobs[n].estimated_runtime_min for n in names
-                    ),
+                    estimated_saving_min=min(dag.jobs[n].estimated_runtime_min for n in names),
                 )
             )
 

@@ -61,9 +61,7 @@ def main():
     print(" 4. JSON Metrics Export")
     print("=" * 60)
     metrics = {
-        "efficiency_score": result.reasoning.efficiency_score
-        if result.reasoning
-        else 0,
+        "efficiency_score": result.reasoning.efficiency_score if result.reasoning else 0,
         "runtime_min": result.optimization.original_runtime_min,
         "optimized_runtime_min": result.optimization.optimized_runtime_min,
         "saving_min": result.optimization.total_saving_min,

@@ -62,9 +62,7 @@ def parse_gitlab_ci(yaml_path: str | Path) -> dict[str, Any]:
     with open(path, encoding="utf-8") as fh:
         config: dict = yaml.safe_load(fh)
     if not isinstance(config, dict):
-        raise ValueError(
-            f"Expected YAML mapping at top level, got {type(config).__name__}"
-        )
+        raise ValueError(f"Expected YAML mapping at top level, got {type(config).__name__}")
     return config
 
 
@@ -124,7 +122,7 @@ def extract_jobs(config: dict[str, Any]) -> dict[str, JobInfo]:
             if parallel is not None:
                 parallel = int(parallel) if isinstance(parallel, (int, str)) else None
 
-            runtime = max(len(script) * _RUNTIME_PER_LINE, 0.5)
+            runtime: float = max(len(script) * _RUNTIME_PER_LINE, 0.5)
 
             tags = value.get("tags", [])
             if not isinstance(tags, list):
@@ -175,7 +173,7 @@ def build_dag(config: dict[str, Any]) -> PipelineDAG:
     """
     stages = extract_stages(config)
     jobs = extract_jobs(config)
-    G = nx.DiGraph()
+    G: nx.DiGraph = nx.DiGraph()
 
     # Add nodes
     for name, job in jobs.items():
@@ -216,6 +214,7 @@ def build_dag(config: dict[str, Any]) -> PipelineDAG:
     # Compute metrics
     total_runtime = sum(j.estimated_runtime_min for j in jobs.values())
 
+    critical_path: float
     try:
         critical_path = nx.dag_longest_path_length(G, weight="estimated_runtime_min")
     except (nx.NetworkXError, nx.NetworkXUnfeasible):

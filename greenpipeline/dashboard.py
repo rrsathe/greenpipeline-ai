@@ -150,8 +150,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(
-        "<small style='color:#64748b'>Powered by CodeCarbon · NetworkX · "
-        "AIOpsLab patterns</small>",
+        "<small style='color:#64748b'>Powered by CodeCarbon · NetworkX · AIOpsLab patterns</small>",
         unsafe_allow_html=True,
     )
 
@@ -184,16 +183,14 @@ if run_btn:
     carbon = result.carbon
 
     # ---- Summary metrics ----
-    st.markdown(
-        '<div class="section-header">📊 Pipeline Summary</div>', unsafe_allow_html=True
-    )
+    st.markdown('<div class="section-header">📊 Pipeline Summary</div>', unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
 
     with c1:
         st.markdown(
             f"""<div class="metric-card">
                 <h3>Jobs</h3>
-                <div class="value">{len(dag.jobs)}</div>
+                <div class="value">{len(dag.jobs) if dag else 0}</div>
                 <div class="label">pipeline jobs</div>
             </div>""",
             unsafe_allow_html=True,
@@ -202,25 +199,27 @@ if run_btn:
         st.markdown(
             f"""<div class="metric-card">
                 <h3>Stages</h3>
-                <div class="value">{len(dag.stages)}</div>
+                <div class="value">{len(dag.stages) if dag else 0}</div>
                 <div class="label">pipeline stages</div>
             </div>""",
             unsafe_allow_html=True,
         )
     with c3:
+        original_runtime = f"{opt.original_runtime_min:.1f}m" if opt is not None else "N/A"
         st.markdown(
             f"""<div class="metric-card">
                 <h3>Critical Path</h3>
-                <div class="value">{opt.original_runtime_min:.1f}m</div>
+                <div class="value">{original_runtime}</div>
                 <div class="label">estimated runtime</div>
             </div>""",
             unsafe_allow_html=True,
         )
     with c4:
+        optimized_runtime = f"{opt.optimized_runtime_min:.1f}m" if opt is not None else "N/A"
         st.markdown(
             f"""<div class="metric-card">
                 <h3>Optimised</h3>
-                <div class="value">{opt.optimized_runtime_min:.1f}m</div>
+                <div class="value">{optimized_runtime}</div>
                 <div class="label">after optimisation</div>
             </div>""",
             unsafe_allow_html=True,
@@ -233,10 +232,8 @@ if run_btn:
     )
 
     # Display DAG statistics for debugging
-    if dag.graph and dag.graph.nodes:
-        st.write(
-            f"**Nodes:** {len(dag.graph.nodes)} | **Edges:** {len(dag.graph.edges)}"
-        )
+    if dag and dag.graph and dag.graph.nodes:
+        st.write(f"**Nodes:** {len(dag.graph.nodes)} | **Edges:** {len(dag.graph.edges)}")
 
     # Safety check before rendering
     if dag and dag.graph and len(dag.graph.nodes) > 0:
@@ -253,7 +250,7 @@ if run_btn:
         unsafe_allow_html=True,
     )
 
-    if opt.suggestions:
+    if opt and opt.suggestions:
         for s in opt.suggestions:
             css_class = f"suggestion-card {s.category}"
             st.markdown(
@@ -298,9 +295,7 @@ if run_btn:
             )
 
         with c2:
-            st.markdown(
-                '<div style="padding-top: 0.5rem;"></div>', unsafe_allow_html=True
-            )
+            st.markdown('<div style="padding-top: 0.5rem;"></div>', unsafe_allow_html=True)
             for explanation in result.reasoning.explanations:
                 st.info(explanation, icon="💡")
     else:
@@ -312,85 +307,88 @@ if run_btn:
         unsafe_allow_html=True,
     )
 
-    cc1, cc2, cc3 = st.columns(3)
+    if carbon:
+        cc1, cc2, cc3 = st.columns(3)
 
-    with cc1:
-        st.markdown(
-            f"""<div class="metric-card">
-                <h3>Current Emissions</h3>
-                <div class="carbon-current">{carbon.current_emissions_kg:.4f} kg</div>
-                <div class="label">CO₂ per run</div>
-            </div>""",
-            unsafe_allow_html=True,
-        )
-    with cc2:
-        st.markdown(
-            f"""<div class="metric-card">
-                <h3>Optimised Emissions</h3>
-                <div class="carbon-optimized">{carbon.optimized_emissions_kg:.4f} kg</div>
-                <div class="label">CO₂ per run</div>
-            </div>""",
-            unsafe_allow_html=True,
-        )
-    with cc3:
-        st.markdown(
-            f"""<div class="metric-card">
-                <h3>Reduction</h3>
-                <div class="value">{carbon.reduction_pct:.1f}%</div>
-                <div class="label">carbon savings</div>
-            </div>""",
-            unsafe_allow_html=True,
-        )
+        with cc1:
+            st.markdown(
+                f"""<div class="metric-card">
+                    <h3>Current Emissions</h3>
+                    <div class="carbon-current">{carbon.current_emissions_kg:.4f} kg</div>
+                    <div class="label">CO₂ per run</div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
+        with cc2:
+            st.markdown(
+                f"""<div class="metric-card">
+                    <h3>Optimised Emissions</h3>
+                    <div class="carbon-optimized">{carbon.optimized_emissions_kg:.4f} kg</div>
+                    <div class="label">CO₂ per run</div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
+        with cc3:
+            st.markdown(
+                f"""<div class="metric-card">
+                    <h3>Reduction</h3>
+                    <div class="value">{carbon.reduction_pct:.1f}%</div>
+                    <div class="label">carbon savings</div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
 
-    # Yearly impact calculation
-    runs_per_day = 100
-    yearly_saving_kg = (
-        (carbon.current_emissions_kg - carbon.optimized_emissions_kg)
-        * runs_per_day
-        * 365
-    )
+        # Yearly impact calculation
+        runs_per_day = 100
+        yearly_saving_kg = (
+            (carbon.current_emissions_kg - carbon.optimized_emissions_kg) * runs_per_day * 365
+        )
+    else:
+        st.info("💡 Carbon impact data unavailable for this pipeline.", icon="ℹ️")
+        yearly_saving_kg = 0
 
     st.metric(
         "Estimated yearly CO₂ saving (100 runs/day)",
         f"{yearly_saving_kg:.2f} kg CO₂",
-        delta=f"-{carbon.reduction_pct:.1f}%",
+        delta=f"-{carbon.reduction_pct:.1f}%" if carbon else None,
     )
 
     # Carbon comparison bar chart
-    import matplotlib.pyplot as plt
+    if carbon:
+        import matplotlib.pyplot as plt
 
-    fig2, ax = plt.subplots(figsize=(8, 3))
-    fig2.patch.set_facecolor("#1E1E2E")
-    ax.set_facecolor("#1E1E2E")
+        fig2, ax = plt.subplots(figsize=(8, 3))
+        fig2.patch.set_facecolor("#1E1E2E")
+        ax.set_facecolor("#1E1E2E")
 
-    bars = ax.barh(
-        ["Optimised", "Current"],
-        [carbon.optimized_emissions_kg, carbon.current_emissions_kg],
-        color=["#6ee7b7", "#f87171"],
-        height=0.5,
-        edgecolor="#334155",
-    )
-
-    for bar, val in zip(
-        bars, [carbon.optimized_emissions_kg, carbon.current_emissions_kg], strict=False
-    ):
-        ax.text(
-            bar.get_width() + 0.0001,
-            bar.get_y() + bar.get_height() / 2,
-            f" {val:.4f} kg CO₂",
-            va="center",
-            color="white",
-            fontsize=10,
+        bars = ax.barh(
+            ["Optimised", "Current"],
+            [carbon.optimized_emissions_kg, carbon.current_emissions_kg],
+            color=["#6ee7b7", "#f87171"],
+            height=0.5,
+            edgecolor="#334155",
         )
 
-    ax.set_xlabel("kg CO₂", color="#94a3b8")
-    ax.tick_params(colors="#94a3b8")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["bottom"].set_color("#334155")
-    ax.spines["left"].set_color("#334155")
-    fig2.tight_layout()
-    st.pyplot(fig2, width="stretch")
+        for bar, val in zip(
+            bars, [carbon.optimized_emissions_kg, carbon.current_emissions_kg], strict=False
+        ):
+            ax.text(
+                bar.get_width() + 0.0001,
+                bar.get_y() + bar.get_height() / 2,
+                f" {val:.4f} kg CO₂",
+                va="center",
+                color="white",
+                fontsize=10,
+            )
+
+        ax.set_xlabel("kg CO₂", color="#94a3b8")
+        ax.tick_params(colors="#94a3b8")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["bottom"].set_color("#334155")
+        ax.spines["left"].set_color("#334155")
+        fig2.tight_layout()
+        st.pyplot(fig2, width="stretch")
 
     # ---- Suggested Pipeline Patch ----
     st.markdown(
@@ -399,9 +397,7 @@ if run_btn:
     )
 
     if result.optimized_yaml:
-        st.markdown(
-            "**Apply these changes to your `.gitlab-ci.yml` for immediate improvements:**"
-        )
+        st.markdown("**Apply these changes to your `.gitlab-ci.yml` for immediate improvements:**")
         st.code(result.optimized_yaml, language="yaml")
 
         # Download button
@@ -416,14 +412,15 @@ if run_btn:
         st.info("💡 Optimized YAML patch generation coming soon.")
 
     # ---- Energy details ----
-    with st.expander("📋 Energy Details"):
-        st.markdown(f"""
-        | Metric | Current | Optimised |
-        |--------|---------|-----------|
-        | **Energy (kWh)** | {carbon.current_energy_kwh:.6f} | {carbon.optimized_energy_kwh:.6f} |
-        | **Emissions (kg CO₂)** | {carbon.current_emissions_kg:.6f} | {carbon.optimized_emissions_kg:.6f} |
-        | **Methodology** | {carbon.methodology} | — |
-        """)
+    if carbon:
+        with st.expander("📋 Energy Details"):
+            st.markdown(f"""
+            | Metric | Current | Optimised |
+            |--------|---------|-----------|
+            | **Energy (kWh)** | {carbon.current_energy_kwh:.6f} | {carbon.optimized_energy_kwh:.6f} |
+            | **Emissions (kg CO₂)** | {carbon.current_emissions_kg:.6f} | {carbon.optimized_emissions_kg:.6f} |
+            | **Methodology** | {carbon.methodology} | — |
+            """)
 
     st.markdown("---")
     st.markdown(

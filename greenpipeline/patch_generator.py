@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
+from typing import Any
 
 import yaml
 
 from greenpipeline import OptimizationReport, PipelineDAG
-from greenpipeline.parser import JobInfo
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,11 @@ def detect_cache_path(script_lines: list[str]) -> str:
         return "vendor/"
 
 
-def generate_patch(original_config: dict, dag: PipelineDAG, opt: OptimizationReport) -> str:
+def generate_patch(
+    original_config: dict[str, Any],
+    dag: PipelineDAG,
+    opt: OptimizationReport,
+) -> str:
     """Generate a complete optimized .gitlab-ci.yml patch as a string.
 
     Args:
@@ -52,53 +56,69 @@ def generate_patch(original_config: dict, dag: PipelineDAG, opt: OptimizationRep
     for suggestion in opt.suggestions:
         if suggestion.category == "caching":
             for job_name in suggestion.affected_jobs:
-                if job_name in config and isinstance(config[job_name], dict):
-                    job_info: JobInfo = dag.jobs.get(job_name)
-                    if job_info is not None:
-                        cache_path = detect_cache_path(job_info.script)
-                        if "cache" not in config[job_name]:
-                            config[job_name]["cache"] = {}
-                        if "paths" not in config[job_name]["cache"]:
-                            config[job_name]["cache"]["paths"] = []
-                        if cache_path not in config[job_name]["cache"]["paths"]:
-                            config[job_name]["cache"]["paths"].append(cache_path)
-                            logger.info(
-                                "Added cache to job %s: [%s]",
-                                job_name,
-                                f"'{cache_path}'",
-                            )
+                job_cfg = config.get(job_name)
+                if not isinstance(job_cfg, dict):
+                    continue
+
+                job_info = dag.jobs.get(job_name)
+                if job_info is None:
+                    continue
+
+                cache_path = detect_cache_path(job_info.script)
+                cache = job_cfg.setdefault("cache", {})
+                if not isinstance(cache, dict):
+                    continue
+
+                paths = cache.setdefault("paths", [])
+                if not isinstance(paths, list):
+                    continue
+
+                if cache_path not in paths:
+                    paths.append(cache_path)
+                    logger.info(
+                        "Added cache to job %s: [%s]",
+                        job_name,
+                        f"'{cache_path}'",
+                    )
 
         elif suggestion.category == "parallelization":
             for job_name in suggestion.affected_jobs:
-                if (
-                    job_name in config
-                    and isinstance(config[job_name], dict)
-                    and dag.graph is not None
-                ):
-                    # Find dependencies from previous stages
-                    job_info = dag.jobs.get(job_name)
-                    if job_info is not None:
-                        stage_idx = (
-                            dag.stages.index(job_info.stage) if job_info.stage in dag.stages else 0
-                        )
+                job_cfg = config.get(job_name)
+                if not isinstance(job_cfg, dict):
+                    continue
 
-                        # Add explicit needs from previous stage to bypass implicit ordering
-                        needs = []
-                        if stage_idx > 0:
-                            prev_stage = dag.stages[stage_idx - 1]
-                            needs = [j for j, info in dag.jobs.items() if info.stage == prev_stage]
+                job_info_parallel = dag.jobs.get(job_name)
+                if job_info_parallel is None:
+                    continue
 
-                        if needs:
-                            if "needs" not in config[job_name]:
-                                config[job_name]["needs"] = []
-                            for n in needs:
-                                if n not in config[job_name]["needs"]:
-                                    config[job_name]["needs"].append(n)
-                            logger.info(
-                                "Added 'needs' to job %s: %s (for parallelization)",
-                                job_name,
-                                ", ".join(needs),
-                            )
+                stage_idx = (
+                    dag.stages.index(job_info_parallel.stage)
+                    if job_info_parallel.stage in dag.stages
+                    else 0
+                )
+
+                needs = []
+                if stage_idx > 0:
+                    prev_stage = dag.stages[stage_idx - 1]
+                    needs = [
+                        j
+                        for j, info in dag.jobs.items()
+                        if info.stage == prev_stage and j != job_name
+                    ]
+
+                if needs:
+                    needs_list = job_cfg.setdefault("needs", [])
+                    if not isinstance(needs_list, list):
+                        continue
+
+                    for n in needs:
+                        if n not in needs_list:
+                            needs_list.append(n)
+                    logger.info(
+                        "Added 'needs' to job %s: %s (for parallelization)",
+                        job_name,
+                        ", ".join(needs),
+                    )
 
     # Convert back to YAML with nice formatting
     class CustomDumper(yaml.SafeDumper):

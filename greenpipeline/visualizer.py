@@ -135,8 +135,7 @@ def draw_pipeline_dag(
 
     # Node colours based on stage
     node_colors = [
-        _colour_for_stage(G.nodes[n].get("stage", "unknown"), extra_colours)
-        for n in G.nodes
+        _colour_for_stage(G.nodes[n].get("stage", "unknown"), extra_colours) for n in G.nodes
     ]
 
     # Node sizes proportional to estimated runtime
@@ -204,9 +203,7 @@ def draw_pipeline_dag(
     )
 
     # Legend
-    all_stages = list(
-        dict.fromkeys(G.nodes[n].get("stage", "unknown") for n in G.nodes)
-    )
+    all_stages = list(dict.fromkeys(G.nodes[n].get("stage", "unknown") for n in G.nodes))
     legend_patches = [
         mpatches.Patch(color=_colour_for_stage(s, extra_colours), label=s.capitalize())
         for s in all_stages
@@ -258,8 +255,6 @@ def export_dag_image(fig: Figure, path: str | Path) -> str:
 def fig_to_bytes(fig: Figure) -> bytes:
     """Convert a matplotlib figure to PNG bytes (useful for Streamlit)."""
     buf = BytesIO()
-    fig.savefig(
-        buf, format="png", dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor()
-    )
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
     buf.seek(0)
     return buf.read()

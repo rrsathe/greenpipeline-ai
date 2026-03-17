@@ -11,13 +11,15 @@ Wires parser → optimizer → carbon → visualizer into a single analysis flow
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import sys
 import time
 import uuid
 from pathlib import Path
-from typing import Any, cast
+from types import ModuleType
+from typing import Protocol
 
 from greenpipeline import PipelineResult
 from greenpipeline.carbon import estimate_emissions
@@ -25,6 +27,27 @@ from greenpipeline.optimizer import analyze_pipeline
 from greenpipeline.parser import build_dag, parse_gitlab_ci
 from greenpipeline.patch_generator import generate_patch
 from greenpipeline.visualizer import draw_pipeline_dag, export_dag_image
+
+
+class _AIOpsSessionType(Protocol):
+    session_id: object
+
+    def add(self, data: dict[str, str]) -> None: ...
+
+    def start(self) -> None: ...
+
+    def end(self) -> None: ...
+
+    def to_dict(self) -> dict: ...
+
+
+class _AIOpsResponseParserType(Protocol):
+    def parse(self, response: str) -> dict: ...
+
+
+_runtime_AIOpsSession: type[_AIOpsSessionType] | None = None
+_runtime_AIOpsResponseParser: type[_AIOpsResponseParserType] | None = None
+_runtime_dagger_sdk: ModuleType | None = None
 
 # Ensure the project root is on sys.path for direct script execution.
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -34,9 +57,6 @@ if str(_PROJECT_ROOT) not in sys.path:
 logger = logging.getLogger(__name__)
 
 _SAMPLES_DIR = Path(__file__).parent / "samples"
-AIOpsSession = cast(Any, None)
-AIOpsResponseParser = cast(Any, None)
-dagger_sdk = cast(Any, None)
 
 
 def _has_kube_config() -> bool:
@@ -52,24 +72,21 @@ def _has_kube_config() -> bool:
 # ---- Local AIOpsLab imports ----
 if _has_kube_config():
     try:
-        from aiopslab.orchestrator.parser import (
-            ResponseParser as AIOpsResponseParser,  # type: ignore[import-not-found]
-        )
-        from aiopslab.session import (
-            Session as AIOpsSession,  # type: ignore[import-not-found]
-        )
+        parser_module = importlib.import_module("aiopslab.orchestrator.parser")
+        session_module = importlib.import_module("aiopslab.session")
 
-        _HAS_AIOPSLAB = True
+        _runtime_AIOpsResponseParser = parser_module.ResponseParser
+        _runtime_AIOpsSession = session_module.Session
     except Exception as _err:
         logger.warning("Could not import local AIOpsLab: %s", _err)
-        _HAS_AIOPSLAB = False
 else:
     logger.info("Skipping AIOpsLab import: no Kubernetes config found")
-    _HAS_AIOPSLAB = False
 
 # ---- Local Dagger SDK imports ----
 try:
-    import dagger as dagger_sdk  # type: ignore[import-not-found]  # from dagger/sdk/python/src/
+    _dagger_sdk = importlib.import_module("dagger")  # from dagger/sdk/python/src/
+
+    _runtime_dagger_sdk = _dagger_sdk
 
     _HAS_DAGGER = True
 except Exception as _err:
@@ -93,11 +110,13 @@ class AnalysisSession:
     def __init__(self) -> None:
         self.session_id = str(uuid.uuid4())
         self._start_time = time.time()
-        self._aiops_session = None
+        self._aiops_session: _AIOpsSessionType | None = None
 
-        if _HAS_AIOPSLAB:
-            self._aiops_session = AIOpsSession()
-            self.session_id = str(self._aiops_session.session_id)
+        session_cls = _runtime_AIOpsSession
+        if session_cls is not None:
+            aiops_session = session_cls()
+            self._aiops_session = aiops_session
+            self.session_id = str(aiops_session.session_id)
             logger.info("Using AIOpsLab Session for tracking (id=%s)", self.session_id)
         else:
             logger.info("Using lightweight session (id=%s)", self.session_id)
@@ -133,9 +152,9 @@ class AnalysisSession:
 # Response parsing — reuses AIOpsLab's ResponseParser
 # ---------------------------------------------------------------------------
 
-_response_parser = None
-if _HAS_AIOPSLAB:
-    _response_parser = AIOpsResponseParser()
+_response_parser: _AIOpsResponseParserType | None = None
+if _runtime_AIOpsResponseParser is not None:
+    _response_parser = _runtime_AIOpsResponseParser()
 
 
 def parse_agent_response(response: str) -> dict | None:
@@ -194,7 +213,8 @@ async def simulate_with_dagger(yaml_path: str | Path) -> dict:
     dag = build_dag(config)
 
     try:
-        async with dagger_sdk.connect() as client:
+        assert _runtime_dagger_sdk is not None
+        async with _runtime_dagger_sdk.connect() as client:
             results = {}
             for job_name, job_info in dag.jobs.items():
                 image = job_info.image or "alpine:3.18"

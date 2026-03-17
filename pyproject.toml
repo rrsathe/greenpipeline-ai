@@ -27,7 +27,7 @@ observability = [
     "codecarbon>=2.3",
 ]
 dashboard = ["streamlit>=1.28"]
-dev = ["mypy", "pre-commit", "pytest", "ruff"]
+dev = ["ty", "mypy", "pre-commit", "pytest", "ruff"]
 
 [project.scripts]
 greenpipeline = "greenpipeline.pipeline_runner:main"
@@ -46,11 +46,19 @@ ignore = ["E501"]
 [tool.ruff.lint.isort]
 combine-as-imports = true
 
-[tool.mypy]
-python_version = "3.11"
-disallow_untyped_defs = true
-ignore_missing_imports = true
-warn_unused_ignores = true
+[tool.ty.environment]
+python-version = "3.11"
+
+[tool.ty.analysis]
+replace-imports-with-any = [
+    "networkx.**",
+    "matplotlib.**",
+    "streamlit.**",
+    "codecarbon.**",
+    "kubernetes.**",
+    "docker.**",
+    "pandas.**",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

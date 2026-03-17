@@ -15,7 +15,7 @@ def generate_gitlab_comment(result: PipelineResult) -> str:
 
     if reasoning and reasoning.explanations:
         suggestions = "\n".join(f"- {s}" for s in reasoning.explanations)
-    elif report.suggestions:
+    elif report and report.suggestions:
         suggestions = "\n".join(f"- {s.description}" for s in report.suggestions)
     else:
         suggestions = "No major optimizations detected. Your pipeline is efficient! ✅"

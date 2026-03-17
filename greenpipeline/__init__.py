@@ -91,9 +91,11 @@ class ReasoningReport:
 class PipelineResult:
     """Composite result aggregating all analysis outputs."""
 
-    dag: PipelineDAG | None = None
-    optimization: OptimizationReport | None = None
-    carbon: CarbonReport | None = None
+    dag: PipelineDAG
+    optimization: OptimizationReport
+    carbon: CarbonReport
+
+    # optional layers
     reasoning: ReasoningReport | None = None
     visualization_path: str | None = None
     session_id: str | None = None
