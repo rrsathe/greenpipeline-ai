@@ -11,7 +11,9 @@ from greenpipeline.optimizer import (
 )
 from greenpipeline.parser import build_dag, parse_gitlab_ci
 
-_SAMPLE = Path(__file__).resolve().parent.parent / "samples" / "sample_pipeline.yml"
+_SAMPLE = (
+    Path(__file__).resolve().parent.parent / "greenpipeline" / "samples" / "sample_pipeline.yml"
+)
 
 
 def _get_sample_dag():
@@ -26,7 +28,7 @@ class TestDetectSequentialBottlenecks:
         # The "test" stage has "lint" without needs — should be flagged
         # along with other no-needs jobs in the same stage
         parallel_stages = [s.affected_jobs for s in suggestions]
-        flat = [j for jobs in parallel_stages for j in jobs]
+        [j for jobs in parallel_stages for j in jobs]
         # At minimum lint should appear since it has no needs
         assert len(suggestions) >= 0  # may or may not find depending on config
 

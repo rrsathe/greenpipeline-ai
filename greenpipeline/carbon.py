@@ -12,12 +12,11 @@ Falls back to a physics-based model when CodeCarbon cannot initialise
 
 from __future__ import annotations
 
-import greenpipeline._paths  # noqa: F401 — activate local repo paths
-
 import logging
 import time
 from typing import Any, cast
 
+import greenpipeline._paths  # noqa: F401 — activate local repo paths
 from greenpipeline import CarbonReport, PipelineDAG
 
 logger = logging.getLogger(__name__)
@@ -35,8 +34,8 @@ DataSource = cast(Any, None)
 # ---- Local CodeCarbon imports ----
 try:
     from codecarbon import OfflineEmissionsTracker  # local repo
-    from codecarbon.core.units import Energy, EmissionsPerKWh
     from codecarbon.core.emissions import Emissions
+    from codecarbon.core.units import EmissionsPerKWh, Energy
     from codecarbon.input import DataSource
 
     _HAS_CODECARBON = True
@@ -117,7 +116,7 @@ def _codecarbon_data_estimate(
         energy = Energy.from_energy(kWh=(_BASE_POWER_WATTS / 1000.0) * hours)
 
         data_source = DataSource()
-        emissions_calc = Emissions(data_source)
+        Emissions(data_source)
 
         # Use CodeCarbon's global energy-mix data for the country
         energy_mix = data_source.get_global_energy_mix_data()

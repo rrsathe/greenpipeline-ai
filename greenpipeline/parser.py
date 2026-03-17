@@ -59,7 +59,7 @@ def parse_gitlab_ci(yaml_path: str | Path) -> dict[str, Any]:
     path = Path(yaml_path)
     if not path.exists():
         raise FileNotFoundError(f"Pipeline file not found: {path}")
-    with open(path, "r", encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         config: dict = yaml.safe_load(fh)
     if not isinstance(config, dict):
         raise ValueError(

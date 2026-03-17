@@ -12,7 +12,9 @@ from greenpipeline.parser import (
     parse_gitlab_ci,
 )
 
-_SAMPLE = Path(__file__).resolve().parent.parent / "samples" / "sample_pipeline.yml"
+_SAMPLE = (
+    Path(__file__).resolve().parent.parent / "greenpipeline" / "samples" / "sample_pipeline.yml"
+)
 
 
 class TestParseGitlabCi:

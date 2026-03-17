@@ -16,6 +16,7 @@ matplotlib.use("Agg")  # non-interactive backend for server / Streamlit use
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import networkx as nx
+from matplotlib.figure import Figure
 
 from greenpipeline import PipelineDAG
 
@@ -100,7 +101,7 @@ def draw_pipeline_dag(
     dag: PipelineDAG,
     output_path: str | Path | None = None,
     figsize: tuple[int, int] = (14, 8),
-) -> plt.Figure:
+) -> Figure:
     """Render the pipeline DAG as a matplotlib figure.
 
     Args:
@@ -243,7 +244,7 @@ def draw_pipeline_dag(
     return fig
 
 
-def export_dag_image(fig: plt.Figure, path: str | Path) -> str:
+def export_dag_image(fig: Figure, path: str | Path) -> str:
     """Save a matplotlib figure to disk.
 
     Returns the absolute path of the saved file.
@@ -254,7 +255,7 @@ def export_dag_image(fig: plt.Figure, path: str | Path) -> str:
     return str(p.resolve())
 
 
-def fig_to_bytes(fig: plt.Figure) -> bytes:
+def fig_to_bytes(fig: Figure) -> bytes:
     """Convert a matplotlib figure to PNG bytes (useful for Streamlit)."""
     buf = BytesIO()
     fig.savefig(

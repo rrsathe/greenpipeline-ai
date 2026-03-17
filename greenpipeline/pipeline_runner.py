@@ -221,8 +221,7 @@ async def simulate_with_dagger(yaml_path: str | Path) -> dict:
             "status": "error",
             "message": str(e),
             "hint": (
-                "Ensure the Dagger engine is running. "
-                "Install with: cd dagger && ./install.sh"
+                "Ensure the Dagger engine is running. Install with: cd dagger && ./install.sh"
             ),
         }
 
@@ -281,9 +280,7 @@ def run_analysis(
         config = parse_gitlab_ci(sample)
 
     dag = build_dag(config)
-    session.add(
-        "env", f"Parsed pipeline: {len(dag.jobs)} jobs, {len(dag.stages)} stages"
-    )
+    session.add("env", f"Parsed pipeline: {len(dag.jobs)} jobs, {len(dag.stages)} stages")
     logger.info(
         "Parsed pipeline: %d jobs, %d stages, %.1f min critical path",
         len(dag.jobs),
@@ -334,9 +331,7 @@ def run_analysis(
     from greenpipeline.agents.reasoning_agent import generate_reasoning
 
     reasoning = generate_reasoning(report)
-    session.add(
-        "assistant", f"Pipeline Efficiency Score: {reasoning.efficiency_score}/100"
-    )
+    session.add("assistant", f"Pipeline Efficiency Score: {reasoning.efficiency_score}/100")
     logger.info("Pipeline Efficiency Score: %d", reasoning.efficiency_score)
 
     # 6. Generate optimized YAML patch
@@ -360,11 +355,8 @@ def run_analysis(
     )
 
 
-# ---------------------------------------------------------------------------
-# CLI entrypoint
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
+def main() -> None:
+    """CLI entrypoint for `greenpipeline` command."""
     import argparse
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -375,12 +367,17 @@ if __name__ == "__main__":
     parser.add_argument("--output-dir", default=None, help="Output directory")
     args = parser.parse_args()
 
-    result = run_analysis(
-        yaml_path=args.yaml, country=args.country, output_dir=args.output_dir
-    )
+    result = run_analysis(yaml_path=args.yaml, country=args.country, output_dir=args.output_dir)
 
-    # Print clean Markdown output for GitLab Duo Agent Platform
     from greenpipeline.gitlab_comment import generate_gitlab_comment_with_patch
 
     comment = generate_gitlab_comment_with_patch(result)
     print(comment)
+
+
+# ---------------------------------------------------------------------------
+# CLI entrypoint
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    main()

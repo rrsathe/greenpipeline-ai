@@ -22,12 +22,15 @@ class TestRunAnalysis:
 
     def test_dag_has_jobs(self):
         result = run_analysis()
+        assert result.dag is not None
         assert len(result.dag.jobs) >= 5
 
     def test_optimization_has_suggestions(self):
         result = run_analysis()
+        assert result.optimization is not None
         assert isinstance(result.optimization.suggestions, list)
 
     def test_carbon_has_values(self):
         result = run_analysis()
+        assert result.carbon is not None
         assert result.carbon.current_emissions_kg >= 0

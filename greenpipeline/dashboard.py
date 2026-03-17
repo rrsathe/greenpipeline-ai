@@ -372,7 +372,7 @@ if run_btn:
     )
 
     for bar, val in zip(
-        bars, [carbon.optimized_emissions_kg, carbon.current_emissions_kg]
+        bars, [carbon.optimized_emissions_kg, carbon.current_emissions_kg], strict=False
     ):
         ax.text(
             bar.get_width() + 0.0001,

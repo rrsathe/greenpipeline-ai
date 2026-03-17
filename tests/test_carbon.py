@@ -6,7 +6,9 @@ from greenpipeline import CarbonReport
 from greenpipeline.carbon import compute_carbon_delta, estimate_emissions
 from greenpipeline.parser import build_dag, parse_gitlab_ci
 
-_SAMPLE = Path(__file__).resolve().parent.parent / "samples" / "sample_pipeline.yml"
+_SAMPLE = (
+    Path(__file__).resolve().parent.parent / "greenpipeline" / "samples" / "sample_pipeline.yml"
+)
 
 
 def _get_sample_dag():
@@ -17,9 +19,7 @@ def _get_sample_dag():
 class TestEstimateEmissions:
     def test_returns_carbon_report(self):
         dag = _get_sample_dag()
-        report = estimate_emissions(
-            dag, optimized_runtime_min=dag.critical_path_min * 0.5
-        )
+        report = estimate_emissions(dag, optimized_runtime_min=dag.critical_path_min * 0.5)
         assert isinstance(report, CarbonReport)
 
     def test_non_negative_values(self):
@@ -31,9 +31,7 @@ class TestEstimateEmissions:
 
     def test_reduction_when_optimized(self):
         dag = _get_sample_dag()
-        report = estimate_emissions(
-            dag, optimized_runtime_min=dag.critical_path_min * 0.5
-        )
+        report = estimate_emissions(dag, optimized_runtime_min=dag.critical_path_min * 0.5)
         assert report.reduction_pct >= 0
 
 
