@@ -1,4 +1,4 @@
-"""Generate optimized GitLab CI YAML patches via structural DAG transformations."""
+"""Generate optimized GitLab CI YAML by projecting the optimized DiGraph."""
 
 from __future__ import annotations
 
@@ -6,9 +6,11 @@ import logging
 from copy import deepcopy
 from typing import Any
 
+import networkx as nx
 import yaml
 
 from greenpipeline import OptimizationReport, PipelineDAG
+from greenpipeline.optimizer import optimize_pipeline_structure
 
 logger = logging.getLogger(__name__)
 
@@ -34,150 +36,133 @@ def generate_patch(
     dag: PipelineDAG,
     opt: OptimizationReport,
 ) -> str:
-    """Generate a complete optimized .gitlab-ci.yml patch as a string."""
-    config = deepcopy(original_config)
+    """Backward-compatible entrypoint that now emits graph-based YAML."""
+    _ = opt
+    optimized_graph, _meta = optimize_pipeline_structure(dag)
+    return generate_graph_based_patch(original_config, dag, optimized_graph)
 
-    for suggestion in opt.suggestions:
-        # -------------------------------------------------------------------
-        # 1. STRUCTURAL DAG REWRITE: DEPENDENCY HOISTING
-        # -------------------------------------------------------------------
-        if suggestion.category == "hoisting":
-            affected = suggestion.affected_jobs
-            if not affected:
+
+def generate_graph_based_patch(
+    original_config: dict[str, Any],
+    dag: PipelineDAG,
+    optimized_graph: nx.DiGraph,
+) -> str:
+    """Pass 5: Project the optimized DiGraph back into GitLab CI YAML."""
+    new_config = _extract_global_config(original_config, dag)
+
+    for node_id in nx.topological_sort(optimized_graph):
+        node_data = optimized_graph.nodes[node_id]
+
+        if bool(node_data.get("is_hoisted")):
+            new_config[node_id] = _emit_hoisted_job(node_id, node_data)
+            logger.info("Structural Rewrite: emitted hoisted job %s", node_id)
+            continue
+
+        original_job_cfg = original_config.get(node_id)
+        if not isinstance(original_job_cfg, dict):
+            continue
+
+        job_cfg = deepcopy(original_job_cfg)
+        direct_predecessors = list(optimized_graph.predecessors(node_id))
+        hoisted_nodes = [
+            node
+            for node in optimized_graph.nodes
+            if bool(optimized_graph.nodes[node].get("is_hoisted"))
+        ]
+
+        script_val = job_cfg.get("script", [])
+        script_lines = script_val if isinstance(script_val, list) else [str(script_val)]
+        explicit_hoisted_needs: list[str] = []
+
+        for hoisted_node in hoisted_nodes:
+            hoisted_data = optimized_graph.nodes[hoisted_node]
+            hoisted_command = str(hoisted_data.get("command", "")).strip().lower()
+            if not hoisted_command:
                 continue
 
-            # Identify the common command and the base image
-            common_cmd = None
-            base_image = "alpine:3.18"
-            for job_name in affected:
-                job_cfg = config.get(job_name, {})
-                if "image" in job_cfg:
-                    base_image = job_cfg["image"]
-                script = job_cfg.get("script", [])
-                for line in script:
-                    clean_line = line.strip().lower()
-                    if any(p in clean_line for p in ["npm ci", "npm install", "pip install"]):
-                        common_cmd = line
-                        break
-                if common_cmd:
-                    break
-
-            if not common_cmd:
-                continue
-
-            cache_path = detect_cache_path([common_cmd])
-            prep_job_name = "prepare_dependencies"
-            first_stage = config.get("stages", ["build"])[0]
-
-            # Inject the new master dependency job into the DAG
-            config[prep_job_name] = {
-                "stage": first_stage,
-                "image": base_image,
-                "script": [common_cmd],
-                "cache": {"key": "global-deps-cache", "paths": [cache_path], "policy": "pull-push"},
-            }
-            logger.info(
-                "Structural Rewrite: Created '%s' to hoist '%s'", prep_job_name, common_cmd.strip()
+            has_hoisted_command = any(
+                line.strip().lower() == hoisted_command for line in script_lines
             )
+            if not has_hoisted_command:
+                continue
 
-            # Strip the redundant commands from downstream jobs and rewire them
-            for job_name in affected:
-                job_cfg = config.get(job_name)
-                if not isinstance(job_cfg, dict):
-                    continue
+            if not nx.has_path(optimized_graph, hoisted_node, node_id):
+                continue
 
-                # Strip the command
-                old_script = job_cfg.get("script", [])
-                new_script = [line for line in old_script if line.strip() != common_cmd.strip()]
-                job_cfg["script"] = new_script
+            script_lines = [
+                line for line in script_lines if line.strip().lower() != hoisted_command
+            ]
+            explicit_hoisted_needs.append(hoisted_node)
 
-                # Rewire the DAG
-                needs = job_cfg.setdefault("needs", [])
-                if prep_job_name not in needs:
-                    needs.append(prep_job_name)
-
-                # Configure downstream pull cache
-                cache = job_cfg.setdefault("cache", {})
-                cache["key"] = "global-deps-cache"
+            cache = job_cfg.setdefault("cache", {})
+            if isinstance(cache, dict):
+                cache_path = detect_cache_path([hoisted_command])
+                cache["key"] = f"cache-{hoisted_node}"
                 paths = cache.setdefault("paths", [])
-                if cache_path not in paths:
+                if isinstance(paths, list) and cache_path not in paths:
                     paths.append(cache_path)
                 cache["policy"] = "pull"
 
-                logger.info(
-                    "Rewrote job '%s': removed duplicate install, added edge to '%s'",
-                    job_name,
-                    prep_job_name,
-                )
+        job_cfg["script"] = script_lines
 
-        # -------------------------------------------------------------------
-        # 2. LOCAL OPTIMIZATION: CACHING
-        # -------------------------------------------------------------------
-        elif suggestion.category == "caching":
-            for job_name in suggestion.affected_jobs:
-                job_cfg = config.get(job_name)
-                if not isinstance(job_cfg, dict):
-                    continue
-                # Skip if hoisting already rewrote this job's cache
-                if job_cfg.get("cache", {}).get("key") == "global-deps-cache":
-                    continue
+        combined_needs: list[str] = []
+        for need in explicit_hoisted_needs + direct_predecessors:
+            if need not in combined_needs:
+                combined_needs.append(need)
 
-                job_info = dag.jobs.get(job_name)
-                if job_info is None:
-                    continue
+        if combined_needs:
+            job_cfg["needs"] = combined_needs
+        else:
+            job_info = dag.jobs.get(node_id)
+            first_stage = dag.stages[0] if dag.stages else "build"
+            if job_info is not None and job_info.stage == first_stage:
+                job_cfg["needs"] = []
+            else:
+                job_cfg.pop("needs", None)
 
-                cache_path = detect_cache_path(job_info.script)
-                cache = job_cfg.setdefault("cache", {})
-                paths = cache.setdefault("paths", [])
-                if cache_path not in paths:
-                    paths.append(cache_path)
-                    logger.info("Added cache to job %s: ['%s']", job_name, cache_path)
+        new_config[node_id] = job_cfg
 
-        # -------------------------------------------------------------------
-        # 3. TOPOLOGY REWRITE: PARALLELIZATION
-        # -------------------------------------------------------------------
-        elif suggestion.category == "parallelization":
-            for job_name in suggestion.affected_jobs:
-                job_cfg = config.get(job_name)
-                if not isinstance(job_cfg, dict):
-                    continue
+    return _dump_yaml(new_config)
 
-                job_info_parallel = dag.jobs.get(job_name)
-                if job_info_parallel is None:
-                    continue
 
-                stage_idx = (
-                    dag.stages.index(job_info_parallel.stage)
-                    if job_info_parallel.stage in dag.stages
-                    else 0
-                )
+def _extract_global_config(original_config: dict[str, Any], dag: PipelineDAG) -> dict[str, Any]:
+    global_config: dict[str, Any] = {}
 
-                if "needs" not in job_cfg:
-                    job_cfg["needs"] = []
+    for key, value in original_config.items():
+        if key not in dag.jobs:
+            global_config[key] = deepcopy(value)
 
-                needs_list = job_cfg["needs"]
-                if not isinstance(needs_list, list):
-                    continue
+    global_config["stages"] = original_config.get(
+        "stages",
+        ["build", "test", "security", "deploy"],
+    )
+    if "variables" in original_config:
+        global_config["variables"] = deepcopy(original_config["variables"])
 
-                if stage_idx == 0:
-                    # First stage parallelization: empty needs array
-                    logger.info(
-                        "Added 'needs: []' to job %s for immediate parallel execution", job_name
-                    )
-                else:
-                    # Later stage parallelization: explicitly depend on previous stage jobs
-                    prev_stage = dag.stages[stage_idx - 1]
-                    needs = [
-                        j
-                        for j, info in dag.jobs.items()
-                        if info.stage == prev_stage and j != job_name
-                    ]
-                    for n in needs:
-                        if n not in needs_list:
-                            needs_list.append(n)
-                    logger.info("Added explicit 'needs' to job %s for parallelization", job_name)
+    return global_config
 
-    # Convert back to YAML
+
+def _emit_hoisted_job(node_id: str, data: dict[str, Any]) -> dict[str, Any]:
+    command = str(data.get("command", "")).strip()
+    cache_path = detect_cache_path([command])
+
+    return {
+        "stage": data.get("stage", "build"),
+        "image": data.get("image", "alpine:3.18"),
+        "script": [command],
+        "cache": {
+            "key": f"cache-{node_id}",
+            "paths": [cache_path],
+            "policy": "pull-push",
+        },
+        "artifacts": {
+            "paths": [cache_path],
+            "expire_in": "1 hour",
+        },
+    }
+
+
+def _dump_yaml(config: dict[str, Any]) -> str:
     class CustomDumper(yaml.SafeDumper):
         def increase_indent(self, flow=False, indentless=False):
             return super().increase_indent(flow, False)

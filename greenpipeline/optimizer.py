@@ -6,8 +6,12 @@ parallelisation opportunities, missing cache, and pipeline restructuring (hoisti
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from collections import defaultdict
+from typing import Any
+
+import networkx as nx
 
 from greenpipeline import OptimizationReport, PipelineDAG, Suggestion
 
@@ -28,6 +32,9 @@ _PACKAGE_MANAGER_PATTERNS = (
     "mvn install",
     "gradle build",
 )
+
+_DEFAULT_HOIST_IMAGE = "alpine:3.18"
+_HOIST_RUNTIME_HEURISTIC_MIN = 1.0
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +72,66 @@ def analyze_pipeline(dag: PipelineDAG) -> OptimizationReport:
     )
 
 
+def optimize_pipeline_structure(dag: PipelineDAG) -> tuple[nx.DiGraph, dict[str, Any]]:
+    """Run structural optimization passes over the pipeline graph.
+
+    Passes:
+        1. Pattern Extraction (hoist groups)
+        2. Graph Transformation (inject hoisted prep nodes)
+        3. Transitive Reduction
+        4. Critical Path Recalculation (node-weight based)
+    """
+    groups = _detect_hoist_groups(dag)
+
+    graph_prime = dag.graph.copy()
+    hoist_metadata: dict[str, dict[str, Any]] = {}
+
+    for (image, command), jobs in groups.items():
+        prep_node_id = _make_prep_node_id(image=image, command=command)
+
+        graph_prime.add_node(
+            prep_node_id,
+            stage=dag.jobs[jobs[0]].stage,
+            weight=_HOIST_RUNTIME_HEURISTIC_MIN,
+            estimated_runtime_min=_HOIST_RUNTIME_HEURISTIC_MIN,
+            is_hoisted=True,
+            image=image,
+            command=command,
+        )
+
+        first_job = jobs[0]
+        predecessors = list(graph_prime.predecessors(first_job))
+        for predecessor in predecessors:
+            graph_prime.add_edge(predecessor, prep_node_id, type="hoist-input")
+
+        for job_name in jobs:
+            graph_prime.add_edge(prep_node_id, job_name, type="hoist")
+
+            current_runtime = float(graph_prime.nodes[job_name].get("estimated_runtime_min", 0.0))
+            adjusted_runtime = max(current_runtime - _HOIST_RUNTIME_HEURISTIC_MIN, 0.1)
+            graph_prime.nodes[job_name]["estimated_runtime_min"] = adjusted_runtime
+
+        hoist_metadata[prep_node_id] = {
+            "jobs": list(jobs),
+            "command": command,
+            "image": image,
+        }
+
+    reduced_graph = nx.transitive_reduction(graph_prime)
+    for node in graph_prime.nodes:
+        if node in reduced_graph:
+            reduced_graph.nodes[node].update(graph_prime.nodes[node])
+
+    optimized_path = nx.dag_longest_path(reduced_graph)
+    optimized_runtime = _path_runtime(reduced_graph, optimized_path)
+
+    return reduced_graph, {
+        "hoist_metadata": hoist_metadata,
+        "optimized_runtime": optimized_runtime,
+        "path": optimized_path,
+    }
+
+
 def detect_dependency_hoisting(dag: PipelineDAG) -> list[Suggestion]:
     """Identify duplicate dependency installations that can be hoisted.
 
@@ -73,20 +140,11 @@ def detect_dependency_hoisting(dag: PipelineDAG) -> list[Suggestion]:
     job that passes the dependencies via cache/artifacts.
     """
     suggestions: list[Suggestion] = []
-    install_commands: dict[str, list[str]] = defaultdict(list)
+    groups = _detect_hoist_groups(dag)
 
-    # Scan all jobs for package manager commands
-    for name, job in dag.jobs.items():
-        for line in job.script:
-            line_clean = line.strip().lower()
-            if any(line_clean.startswith(pat) for pat in _PACKAGE_MANAGER_PATTERNS):
-                install_commands[line_clean].append(name)
-
-    # If an install command is repeated >= 2 times, it's a structural bottleneck
-    for command, jobs in install_commands.items():
+    for (_, command), jobs in groups.items():
         if len(jobs) >= 2:
-            saving_per_job = 1.0  # Heuristic: npm ci / pip install takes ~1 min
-            total_saving = saving_per_job * (len(jobs) - 1)  # Save time on N-1 jobs
+            total_saving = _HOIST_RUNTIME_HEURISTIC_MIN * (len(jobs) - 1)
 
             suggestions.append(
                 Suggestion(
@@ -103,6 +161,29 @@ def detect_dependency_hoisting(dag: PipelineDAG) -> list[Suggestion]:
             )
 
     return suggestions
+
+
+def _detect_hoist_groups(dag: PipelineDAG) -> dict[tuple[str, str], list[str]]:
+    """PASS 1: Identify repeated (image, command) install patterns."""
+    groups: dict[tuple[str, str], list[str]] = defaultdict(list)
+
+    for job_name, job in dag.jobs.items():
+        base_image = job.image or _DEFAULT_HOIST_IMAGE
+        for line in job.script:
+            clean_line = line.strip().lower()
+            if any(clean_line.startswith(pattern) for pattern in _PACKAGE_MANAGER_PATTERNS):
+                groups[(base_image, clean_line)].append(job_name)
+
+    return {key: names for key, names in groups.items() if len(names) >= 2}
+
+
+def _make_prep_node_id(image: str, command: str) -> str:
+    digest = hashlib.sha1(f"{image}::{command}".encode()).hexdigest()[:8]
+    return f"prep_{digest}"
+
+
+def _path_runtime(graph: nx.DiGraph, path: list[str]) -> float:
+    return sum(float(graph.nodes[node].get("estimated_runtime_min", 1.0)) for node in path)
 
 
 def detect_sequential_bottlenecks(dag: PipelineDAG) -> list[Suggestion]:

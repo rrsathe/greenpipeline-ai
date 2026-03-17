@@ -25,9 +25,9 @@ from typing import Protocol
 import greenpipeline._paths  # noqa: F401
 from greenpipeline import PipelineResult
 from greenpipeline.carbon import estimate_emissions
-from greenpipeline.optimizer import analyze_pipeline
+from greenpipeline.optimizer import analyze_pipeline, optimize_pipeline_structure
 from greenpipeline.parser import build_dag, parse_gitlab_ci
-from greenpipeline.patch_generator import generate_patch
+from greenpipeline.patch_generator import generate_graph_based_patch
 from greenpipeline.visualizer import draw_pipeline_dag, export_dag_image
 
 
@@ -411,13 +411,17 @@ def run_analysis(
     session.add("assistant", f"Pipeline Efficiency Score: {reasoning.efficiency_score}/100")
     logger.info("Pipeline Efficiency Score: %d", reasoning.efficiency_score)
 
-    # 7. Generate optimized YAML patch
-    optimized_yaml = generate_patch(config, dag, report)
+    # 7. Generate optimized YAML patch from structurally reduced graph
+    optimized_graph, structural_meta = optimize_pipeline_structure(dag)
+    optimized_yaml = generate_graph_based_patch(config, dag, optimized_graph)
     session.add(
         "assistant",
-        "Generated optimized YAML patch with suggested improvements",
+        "Generated optimized YAML patch from reduced dependency graph",
     )
-    logger.info("Generated optimized YAML patch")
+    logger.info(
+        "Generated graph-based YAML patch (hoisted jobs: %d)",
+        len(structural_meta.get("hoist_metadata", {})),
+    )
 
     session.end()
 
