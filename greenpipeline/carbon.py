@@ -57,6 +57,8 @@ _DEFAULT_COUNTRY = "USA"
 _BASE_POWER_WATTS = 50.0
 _FALLBACK_CARBON_INTENSITY = 0.42  # kg CO2 / kWh — US average
 
+_EMPTY_ESTIMATE: EmissionEstimate = {"emissions_kg": 0.0, "energy_kwh": 0.0}
+
 
 # ---------------------------------------------------------------------------
 # Internal estimators
@@ -65,14 +67,13 @@ _FALLBACK_CARBON_INTENSITY = 0.42  # kg CO2 / kWh — US average
 
 def _try_codecarbon_estimate(
     duration_min: float, country: str = _DEFAULT_COUNTRY
-) -> EmissionEstimate | dict[str, float]:
+) -> EmissionEstimate:
     """Use the local CodeCarbon ``OfflineEmissionsTracker`` for estimation.
 
-    Returns dict with ``emissions_kg`` and ``energy_kwh``, or empty dict
-    on failure.
+    Returns an ``EmissionEstimate`` with zero values if unavailable or on failure.
     """
     if not _has_codecarbon:
-        return {}
+        return _EMPTY_ESTIMATE
 
     try:
         tracker = OfflineEmissionsTracker(
@@ -105,12 +106,12 @@ def _try_codecarbon_estimate(
         }
     except Exception as e:
         logger.warning("CodeCarbon tracker failed, using fallback: %s", e)
-        return {}
+        return _EMPTY_ESTIMATE
 
 
 def _codecarbon_data_estimate(
     duration_min: float, country: str = _DEFAULT_COUNTRY
-) -> EmissionEstimate | dict[str, float]:
+) -> EmissionEstimate:
     """Use CodeCarbon's ``Emissions`` + ``DataSource`` for emission-factor
     lookup *without* spinning up the full hardware tracker.
 
@@ -118,7 +119,7 @@ def _codecarbon_data_estimate(
     power draw and then apply CodeCarbon's country-level carbon intensity.
     """
     if not _has_codecarbon:
-        return {}
+        return _EMPTY_ESTIMATE
 
     try:
         hours = duration_min / 60.0
@@ -146,7 +147,7 @@ def _codecarbon_data_estimate(
         }
     except Exception as e:
         logger.warning("CodeCarbon data-based estimate failed: %s", e)
-        return {}
+        return _EMPTY_ESTIMATE
 
 
 def _fallback_estimate(duration_min: float) -> EmissionEstimate:
@@ -197,9 +198,9 @@ def estimate_emissions(
 
     # Try each estimator in order of preference
     current_est = _try_codecarbon_estimate(current_runtime, country)
-    if not current_est:
+    if current_est["emissions_kg"] == 0.0:
         current_est = _codecarbon_data_estimate(current_runtime, country)
-    if not current_est:
+    if current_est["emissions_kg"] == 0.0:
         current_est = _fallback_estimate(current_runtime)
 
     # Scale optimised estimate proportionally

@@ -73,3 +73,7 @@ replace-imports-with-any = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[[tool.mypy.overrides]]
+module = "codecarbon.*"
+ignore_missing_imports = true

@@ -72,8 +72,8 @@ def extract_stages(config: dict[str, Any]) -> list[str]:
     Falls back to ``["build", "test", "deploy"]`` if no ``stages:`` key.
     """
     stages = config.get("stages")
-    if stages and isinstance(stages, list):
-        return list(stages)
+    if isinstance(stages, list):
+        return [str(s) for s in stages]
     return ["build", "test", "deploy"]
 
 
