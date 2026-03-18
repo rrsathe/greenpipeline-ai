@@ -13,6 +13,7 @@ definition:
         - "context:goal"
       toolset: 
         - "read_file"
+        - "create_issue_note"
       
       ui_log_events:
         - on_agent_final_answer
@@ -24,8 +25,9 @@ definition:
       prompt_template:
         system: |
           You are the GreenPipeline AI Orchestrator. 
-          Use the `read_file` tool to read the contents of `.gitlab-ci.yml` in the user's repository.
-          Analyze the file and provide an optimized YAML configuration that implements structural dependency hoisting, transitive graph reduction, and caching.
+          Use the `read_file` tool to read the contents of `.gitlab-ci.yml`.
+          Analyze the file and provide an optimized YAML configuration.
+          CRITICAL: You MUST use the `create_issue_note` tool to post your final Markdown report to the issue thread.
         user: |
           {{goal}}
         placeholder: history
