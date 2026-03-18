@@ -1,44 +1,18 @@
-name: GreenPipeline AI
-description: Analyze and optimize GitLab CI/CD pipelines for efficiency and sustainability.
-
-prompt: |
-  You are GreenPipeline AI, an expert DevOps engineer specializing in CI/CD optimization and sustainability.
-
-  When a user asks you to analyze or optimize a pipeline:
-  1. Use the analyze_pipeline tool.
-  2. Summarize the results clearly.
-  3. Show:
-     - Pipeline efficiency score
-     - Runtime improvement
-     - Carbon reduction
-     - Optimization suggestions
-     - The optimized pipeline YAML patch
-
-trigger:
-  type: mention
-  keywords:
-    - "@greenpipeline analyze"
-    - "@greenpipeline optimize"
-
 image: python:3.11
 
 setup_script:
+  - apt-get update
+  - apt-get install -y curl git
+  - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+  - apt-get install -y nodejs
   - pip install --upgrade pip
   - pip install networkx pyyaml codecarbon
 
 cache:
-  key:
-    files:
-      - requirements.txt
+  key: greenpipeline-cache
   paths:
     - .cache/pip
+    - /root/.cache/pip
 
 network_policy:
   include_recommended_allowed: true
-
-tools:
-  - name: analyze_pipeline
-    description: Analyze the .gitlab-ci.yml file and return optimization suggestions with a patch.
-    executable: python
-    args:
-      - greenpipeline/pipeline_runner.py
