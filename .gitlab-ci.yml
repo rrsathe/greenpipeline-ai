@@ -1,0 +1,81 @@
+stages:
+  - build
+  - test
+  - security
+  - deploy
+
+variables:
+  NODE_VERSION: '18'
+  DOCKER_IMAGE: node:18-alpine
+
+build_app:
+  stage: build
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+
+build_docker:
+  stage: build
+  image: docker:24
+  script:
+    - docker build -t myapp:latest .
+    - docker tag myapp:latest registry.example.com/myapp:latest
+
+unit_tests:
+  stage: test
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm run test:unit
+  artifacts:
+    reports:
+      junit: reports/unit.xml
+
+integration_tests:
+  stage: test
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm run test:integration
+  artifacts:
+    reports:
+      junit: reports/integration.xml
+
+lint:
+  stage: test
+  image: node:18-alpine
+  script:
+    - npm ci
+    - npm run lint
+
+sast_scan:
+  stage: security
+  image: python:3.11-slim
+  script:
+    - pip install bandit
+    - bandit -r src/ -f json -o sast-report.json || true
+  artifacts:
+    paths:
+      - sast-report.json
+
+dependency_check:
+  stage: security
+  image: node:18-alpine
+  script:
+    - npm audit --json > audit-report.json || true
+  artifacts:
+    paths:
+      - audit-report.json
+
+deploy_staging:
+  stage: deploy
+  image: alpine:3.18
+  script:
+    - echo "Deploying to staging..."
+    - sleep 5
+  environment:
+    name: staging
