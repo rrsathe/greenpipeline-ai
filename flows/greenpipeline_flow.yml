@@ -1,0 +1,41 @@
+name: "GreenPipeline Flow"
+description: "A flow that triggers the GreenPipeline DAG Compiler to optimize CI/CD pipelines in Merge Requests."
+public: true
+definition:
+  version: v1
+  environment: ambient
+  
+  components:
+    - name: "greenpipeline_orchestrator"
+      type: AgentComponent
+      prompt_id: "greenpipeline_prompt"
+      inputs:
+        - "context:goal"
+      toolset: 
+        - "read_file"
+      
+      ui_log_events:
+        - on_agent_final_answer
+        - on_tool_execution_success
+  
+  prompts:
+    - prompt_id: "greenpipeline_prompt"
+      name: "GreenPipeline Orchestrator Prompt"
+      prompt_template:
+        system: |
+          You are the GreenPipeline AI Orchestrator. 
+          Use the `read_file` tool to read the contents of `.gitlab-ci.yml` in the user's repository.
+          Analyze the file and provide an optimized YAML configuration that implements structural dependency hoisting, transitive graph reduction, and caching.
+        user: |
+          {{goal}}
+        placeholder: history
+      unit_primitives: []
+      params:
+        timeout: 180
+  
+  routers:
+    - from: "greenpipeline_orchestrator"
+      to: "end"
+  
+  flow:
+    entry_point: "greenpipeline_orchestrator"
