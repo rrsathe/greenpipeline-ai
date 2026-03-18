@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "agents": {
+    "agents/agent.yml": {
+      "catalog_id": "gid://gitlab/Ai::Catalog::Item/1005343",
+      "name": "GreenPipeline Agent",
+      "created_at": "2026-03-18T11:26:59.837Z",
+      "item_consumers": {
+        "group": {
+          "id": "gid://gitlab/Ai::Catalog::ItemConsumer/5496357"
+        },
+        "project": {
+          "id": "gid://gitlab/Ai::Catalog::ItemConsumer/5496358"
+        }
+      },
+      "latest_sync": {
+        "git_tag": "v1.0.1",
+        "catalog_version": "1.0.0",
+        "synced_at": "2026-03-18T11:26:59.837Z",
+        "definition_hash": "dd8eeefa8ca685e0"
+      }
+    }
+  },
+  "flows": {
+    "flows/flow.yml": {
+      "catalog_id": "gid://gitlab/Ai::Catalog::Item/1005344",
+      "name": "GreenPipeline Flow",
+      "created_at": "2026-03-18T11:27:00.907Z",
+      "item_consumers": {
+        "group": {
+          "id": "gid://gitlab/Ai::Catalog::ItemConsumer/5496359"
+        },
+        "project": {
+          "id": "gid://gitlab/Ai::Catalog::ItemConsumer/5496360"
+        }
+      },
+      "latest_sync": {
+        "git_tag": "v1.0.1",
+        "catalog_version": "1.0.0",
+        "synced_at": "2026-03-18T11:27:00.907Z",
+        "definition_hash": "50f634015aca2a95"
+      }
+    }
+  }
+}
